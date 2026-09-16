@@ -89,9 +89,8 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVO56OgZil64AgNQk1EF823a8e4gAPaMP9PJG0E7X-QbBKfp85EsK8rloM_3NPv9ru/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyawrgkyHORWdXi9FnUnuKz3aCD4GmRifncv1WsHR7Mwe12s5OU7Cf9Tzr48vvN7aTA/exec";
 
-    // تحديث الساعة الحية
     function updateClock() {
       const now = new Date();
       document.getElementById('currentTime').textContent = now.toLocaleTimeString('ar-EG');
@@ -100,7 +99,6 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // فحص تسجيل الدخول المحفوظ مسبقاً
     window.onload = function() {
       const savedUser = localStorage.getItem('makan_user');
       if (savedUser) {
@@ -126,10 +124,13 @@
       try {
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
+          redirect: 'follow',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'login', code: code, password: pass })
         });
-        const data = await res.json();
+        
+        const text = await res.text();
+        const data = JSON.parse(text);
 
         if (data && data.success) {
           const user = { code: code, name: data.result.name };
@@ -139,7 +140,7 @@
           showMsg(statusBox, (data && data.error) ? data.error : 'كود الموظف أو كلمة المرور غير صحيحة.', 'error');
         }
       } catch (err) {
-        showMsg(statusBox, 'تعذر التحقق، تأكد من اتصال الإنترنت.', 'error');
+        showMsg(statusBox, 'تعذر التحقق، يرجى المحاولة مرة أخرى أو مراجعة الاتصال.', 'error');
       } finally {
         card.classList.remove('loading');
       }
@@ -176,10 +177,13 @@
       try {
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
+          redirect: 'follow',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: actionType, code: user.code })
         });
-        const data = await res.json();
+        
+        const text = await res.text();
+        const data = JSON.parse(text);
 
         if (data && data.success) {
           showMsg(statusBox, data.result.message || 'تمت العملية بنجاح!', 'success');
