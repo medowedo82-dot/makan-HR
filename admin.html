@@ -14,12 +14,15 @@
     label { display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px; }
     input, select { width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
     input:focus, select:focus { border-color: #2563eb; }
-    button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 15px; }
+    button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 15px; transition: 0.2s; }
     button:active { transform: scale(0.99); }
-    .status-box { margin-top: 15px; padding: 12px; border-radius: 8px; font-size: 13px; display: none; text-align: center; }
+    .status-box { margin-top: 15px; padding: 14px; border-radius: 8px; font-size: 13px; display: none; text-align: center; line-height: 1.5; }
     .success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
     .error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-    .auth-section { text-align: center; }
+    .credential-card { background: #ffffff; border: 1.5px dashed #10b981; border-radius: 10px; padding: 12px; margin-top: 10px; text-align: right; color: #1e293b; }
+    .cred-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 14px; }
+    .cred-val { font-family: monospace; font-size: 16px; font-weight: bold; }
+    .copy-btn { width: auto; padding: 6px 12px; font-size: 12px; margin-top: 8px; background: #059669; }
   </style>
 </head>
 <body>
@@ -70,14 +73,11 @@
   </div>
 
   <script>
-    // كلمة مرور دخول شاشة الإدارة (يمكنك تعديلها)
     const ADMIN_PASSWORD = "123"; 
-
-    // رابط الـ Web App الخاص بك من Google Apps Script
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVO56OgZil64AgNQk1EF823a8e4gAPaMP9PJG0E7X-QbBKfp85EsK8rloM_3NPv9ru/exec";
 
     function checkAdminLogin() {
-      const pin = document.getElementById('adminPin').value;
+      const pin = document.getElementById('adminPin').value.trim();
       if (pin === ADMIN_PASSWORD) {
         document.getElementById('loginCard').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
@@ -103,7 +103,7 @@
         return;
       }
 
-      msg.textContent = 'جاري تسجيل الموظف في الشيت...';
+      msg.textContent = 'جاري تسجيل الموظف وتوليد الكود والباسورد...';
       msg.className = 'status-box';
       msg.style.display = 'block';
 
@@ -119,22 +119,49 @@
             shiftType: shift
           })
         });
+        
         const data = await res.json();
 
-        if (data.success) {
-          msg.textContent = 'تم تسجيل الموظف! الكود: ' + data.result.account;
+        if (data.success && data.result) {
+          const emp = data.result;
           msg.className = 'status-box success';
+          msg.innerHTML = `
+            <div style="font-weight: bold; font-size: 14px;">✅ تم إنشاء وتفعيل حساب الموظف بنجاح!</div>
+            <div class="credential-card">
+              <div class="cred-row">
+                <span>اسم الموظف:</span>
+                <b>${emp.name}</b>
+              </div>
+              <div class="cred-row">
+                <span>كود الدخول:</span>
+                <span class="cred-val" style="color: #2563eb;">${emp.code}</span>
+              </div>
+              <div class="cred-row">
+                <span>كلمة المرور:</span>
+                <span class="cred-val" style="color: #d97706;">${emp.password}</span>
+              </div>
+              <button type="button" class="copy-btn" onclick="copyCredentials('${emp.name}', '${emp.code}', '${emp.password}')">📋 نسخ بيانات الدخول</button>
+            </div>
+          `;
+          
           document.getElementById('fullName').value = '';
           document.getElementById('nationalId').value = '';
           document.getElementById('department').value = '';
         } else {
-          msg.textContent = data.error || 'حدث خطأ أثناء الإضافة.';
+          msg.textContent = data.error || 'حدث خطأ أثناء إضافة الموظف.';
           msg.className = 'status-box error';
         }
       } catch (e) {
-        msg.textContent = 'تم إرسال البيانات بنجاح إلى النظام!';
-        msg.className = 'status-box success';
+        msg.textContent = 'تم إرسال الطلب، يرجى مراجعة شيت Employees للتأكد.';
+        msg.className = 'status-box error';
       }
+    }
+
+    function copyCredentials(name, code, pass) {
+      const textToCopy = `بيانات دخول نظام الحضور والانصراف (MAKAN HR):\nالموظف: ${name}\nكود الموظف: ${code}\nكلمة المرور: ${pass}`;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('تم نسخ بيانات الموظف بنجاح!');
+      });
     }
   </script>
 </body>
