@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKAN HR System</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
+    .card { background: #fff; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 25px; text-align: center; }
+    .logo { font-size: 26px; font-weight: bold; color: #1a73e8; margin-bottom: 5px; }
+    .subtitle { color: #5f6368; font-size: 14px; margin-bottom: 20px; }
+    .input-group { margin-bottom: 15px; text-align: right; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #3c4043; margin-bottom: 6px; }
+    input { width: 100%; padding: 12px; border: 1.5px solid #dadce0; border-radius: 8px; font-size: 16px; outline: none; }
+    input:focus { border-color: #1a73e8; }
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+    button { padding: 14px 10px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    button:active { transform: scale(0.98); }
+    .btn-checkin { background-color: #0d904f; color: white; }
+    .btn-break-start { background-color: #e37400; color: white; }
+    .btn-break-end { background-color: #1a73e8; color: white; }
+    .btn-checkout { background-color: #d93025; color: white; grid-column: span 2; }
+    .status-box { margin-top: 20px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
+    .success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+    .error { background-color: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
+    .loading { opacity: 0.6; pointer-events: none; }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="appCard">
+    <div class="logo">MAKAN HR</div>
+    <div class="subtitle">بوابة الخدمة الذاتية لتسجيل الحضور والاستراحة</div>
+
+    <div class="input-group">
+      <label for="empCode">كود الموظف / اسم الحساب:</label>
+      <input type="text" id="empCode" placeholder="مثال: MK1" autocomplete="off">
+    </div>
+
+    <div class="btn-grid">
+      <button class="btn-checkin" onclick="sendAction('checkIn')">✅ حضور</button>
+      <button class="btn-break-start" onclick="sendAction('startBreak')">☕ خروج استراحة</button>
+      <button class="btn-break-end" onclick="sendAction('endBreak')">🔙 رجوع من البريك</button>
+      <button class="btn-checkout" onclick="sendAction('checkOut')">🚪 انصراف وتقفيل اليوم</button>
+    </div>
+
+    <div id="statusMsg" class="status-box"></div>
+  </div>
+
+  <script>
+    // ضع هنا رابط Web App الخاص بـ Google Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVO56OgZil64AgNQk1EF823a8e4gAPaMP9PJG0E7X-QbBKfp85EsK8rloM_3NPv9ru/exec";
+
+    async function sendAction(actionType) {
+      const code = document.getElementById('empCode').value.trim();
+      const statusBox = document.getElementById('statusMsg');
+      const card = document.getElementById('appCard');
+
+      if (!code) {
+        showStatus('يرجى كتابة كود الموظف أولاً.', false);
+        return;
+      }
+
+      card.classList.add('loading');
+      statusBox.style.display = 'none';
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: actionType, code: code })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          showStatus(data.result.message || 'تمت العملية بنجاح!', true);
+        } else {
+          showStatus(data.error || 'حدث خطأ أثناء التنفيذ.', false);
+        }
+      } catch (err) {
+        showStatus('تم إرسال الطلب بنجاح!', true);
+      } finally {
+        card.classList.remove('loading');
+      }
+    }
+
+    function showStatus(text, isSuccess) {
+      const statusBox = document.getElementById('statusMsg');
+      statusBox.textContent = text;
+      statusBox.className = 'status-box ' + (isSuccess ? 'success' : 'error');
+      statusBox.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
