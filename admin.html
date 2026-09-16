@@ -3,156 +3,255 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة الإدارة - MAKAN HR</title>
+  <title>لوحة القيادة والتحكم الإداري - MAKAN HR</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #eef2f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-    .card { background: #fff; width: 100%; max-width: 460px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 25px; }
-    .logo { font-size: 22px; font-weight: bold; color: #1e293b; text-align: center; margin-bottom: 5px; }
-    .subtitle { color: #64748b; font-size: 13px; text-align: center; margin-bottom: 20px; }
-    .input-group { margin-bottom: 12px; text-align: right; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px; }
-    input, select { width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
-    input:focus, select:focus { border-color: #2563eb; }
-    button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 15px; transition: 0.2s; }
-    button:active { transform: scale(0.99); }
-    .status-box { margin-top: 15px; padding: 14px; border-radius: 8px; font-size: 13px; display: none; text-align: center; line-height: 1.5; }
-    .success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-    .error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-    .credential-card { background: #ffffff; border: 1.5px dashed #10b981; border-radius: 10px; padding: 12px; margin-top: 10px; text-align: right; color: #1e293b; }
-    .cred-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 14px; }
-    .cred-val { font-family: monospace; font-size: 16px; font-weight: bold; }
-    .copy-btn { width: auto; padding: 6px 12px; font-size: 12px; margin-top: 8px; background: #059669; }
+    body { background-color: #f1f5f9; margin: 0; padding: 20px; color: #1e293b; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    
+    .login-box { background: #fff; width: 100%; max-width: 400px; margin: 100px auto; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); padding: 30px; text-align: center; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; border-right: 5px solid #cbd5e1; }
+    .stat-card.blue { border-color: #2563eb; }
+    .stat-card.green { border-color: #10b981; }
+    .stat-card.orange { border-color: #f59e0b; }
+    .stat-card.red { border-color: #ef4444; }
+    .stat-val { font-size: 26px; font-weight: bold; margin-top: 5px; }
+
+    .grid-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+    @media (max-width: 768px) { .grid-sections { grid-template-columns: 1fr; } }
+    
+    .panel { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .panel-header { font-size: 16px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+    
+    table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13px; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
+    th { background: #f8fafc; color: #64748b; }
+    
+    .btn-action { padding: 5px 10px; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: #dcfce7; color: #166534; margin-left: 4px; }
+    .btn-reject { background: #fee2e2; color: #991b1b; }
+    
+    .input-group { margin-bottom: 10px; text-align: right; }
+    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569; }
+    input, select { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
+    button.btn-primary { width: 100%; padding: 11px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    
+    .credential-card { background: #f0fdf4; border: 1px dashed #22c55e; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 13px; }
+    .refresh-btn { background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
   </style>
 </head>
 <body>
 
-  <!-- شاشة الدخول برمز الأمان للإدارة -->
-  <div class="card" id="loginCard">
-    <div class="logo">🔐 دخول الإدارة</div>
-    <div class="subtitle">نظام مكان للموارد البشرية</div>
+  <!-- شاشة الدخول برمز الأمان -->
+  <div class="login-box" id="loginBox">
+    <h2 style="margin: 0 0 5px 0;">🔐 دخول الإدارة</h2>
+    <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">نظام مكان للموارد البشرية</p>
     <div class="input-group">
-      <label>رمز الأمان (Admin PIN):</label>
-      <input type="password" id="adminPin" placeholder="أدخل رمز مرور الإدارة">
+      <input type="password" id="adminPin" placeholder="أدخل رمز المرور السري" style="text-align: center;">
     </div>
-    <button onclick="checkAdminLogin()">دخول لوحة التحكم</button>
-    <div id="loginMsg" class="status-box"></div>
+    <button class="btn-primary" onclick="verifyAdmin()">دخول لوحة العمليات</button>
+    <div id="loginError" style="color: red; font-size: 12px; margin-top: 10px; display: none;">رمز المرور غير صحيح!</div>
   </div>
 
-  <!-- لوحة تحكم الإدارة (إضافة موظف) -->
-  <div class="card" id="adminPanel" style="display: none;">
-    <div class="logo">⚙️ لوحة الإدارة</div>
-    <div class="subtitle">إضافة موظف جديد وتخصيص البيانات</div>
-
-    <div class="input-group">
-      <label>الاسم بالكامل:</label>
-      <input type="text" id="fullName" placeholder="مثال: أحمد محمد علي">
+  <!-- لوحة العمليات الشاملة -->
+  <div class="container" id="adminDashboard" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <h2 style="margin: 0;">لوحة القيادة والتحكم الإداري</h2>
+        <span style="font-size: 13px; color: #64748b;">متابعة فورية للحضور والانصراف والأذونات</span>
+      </div>
+      <button class="refresh-btn" onclick="fetchDashboardData()">🔄 تحديث البيانات</button>
     </div>
 
-    <div class="input-group">
-      <label>الرقم القومي:</label>
-      <input type="text" id="nationalId" placeholder="14 رقم">
+    <!-- مؤشرات الأداء والعدادات الحية -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div><div style="font-size: 12px; color: #64748b;">إجمالي الموظفين</div><div class="stat-val" id="statTotal">--</div></div>
+        <div style="font-size: 30px;">👥</div>
+      </div>
+      <div class="stat-card green">
+        <div><div style="font-size: 12px; color: #64748b;">الحاضرون اليوم</div><div class="stat-val" id="statPresent">--</div></div>
+        <div style="font-size: 30px;">✅</div>
+      </div>
+      <div class="stat-card orange">
+        <div><div style="font-size: 12px; color: #64748b;">في البريك الآن</div><div class="stat-val" id="statBreak">--</div></div>
+        <div style="font-size: 30px;">☕</div>
+      </div>
+      <div class="stat-card red">
+        <div><div style="font-size: 12px; color: #64748b;">المتأخرون عن الموعد</div><div class="stat-val" id="statLate">--</div></div>
+        <div style="font-size: 30px;">⏰</div>
+      </div>
     </div>
 
-    <div class="input-group">
-      <label>الإدارة:</label>
-      <input type="text" id="department" placeholder="مثال: المبيعات / الحسابات">
+    <!-- الجداول المباشرة: بريك ومتأخرين -->
+    <div class="grid-sections">
+      <div class="panel">
+        <div class="panel-header">☕ في استراحة الآن</div>
+        <table>
+          <thead><tr><th>الموظف</th><th>الكود</th><th>وقت البدء</th></tr></thead>
+          <tbody id="breakTableBody"><tr><td colspan="3" style="text-align: center;">لا يوجد أحد في استراحة</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">⚠️ المتأخرون اليوم</div>
+        <table>
+          <thead><tr><th>الموظف</th><th>الكود</th><th>وقت الحضور</th></tr></thead>
+          <tbody id="lateTableBody"><tr><td colspan="3" style="text-align: center;">لا توجد حالات تأخير مسجلة</td></tr></tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="input-group">
-      <label>نوع الشفت:</label>
-      <select id="shiftType">
-        <option value="صباحي">صباحي</option>
-        <option value="مسائي">مسائي</option>
-        <option value="شفت كامل">شفت كامل</option>
-      </select>
+    <!-- طلبات الإجازات والأذونات المعلقة -->
+    <div class="grid-sections">
+      <div class="panel">
+        <div class="panel-header">🌴 طلبات الإجازة المعلقة</div>
+        <table>
+          <thead><tr><th>الموظف</th><th>النوع</th><th>الفترة</th><th>القرار</th></tr></thead>
+          <tbody id="leaveTableBody"><tr><td colspan="4" style="text-align: center;">لا توجد طلبات إجازة معلقة</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">🚪 طلبات الأذن والانصراف المبكر</div>
+        <table>
+          <thead><tr><th>الموظف</th><th>الوقت</th><th>السبب</th><th>القرار</th></tr></thead>
+          <tbody id="permTableBody"><tr><td colspan="4" style="text-align: center;">لا توجد طلبات أذونات معلقة</td></tr></tbody>
+        </table>
+      </div>
     </div>
 
-    <button onclick="submitNewEmployee()">➕ إضافة الموظف للنظام</button>
-    <div id="adminMsg" class="status-box"></div>
+    <!-- نموذج إضافة موظف جديد -->
+    <div class="panel" style="max-width: 500px; margin-bottom: 30px;">
+      <div class="panel-header">➕ تسجيل موظف جديد بالنظام</div>
+      <div class="input-group"><label>الاسم بالكامل:</label><input type="text" id="newName"></div>
+      <div class="input-group"><label>الرقم القومي:</label><input type="text" id="newNId"></div>
+      <div class="input-group"><label>الإدارة:</label><input type="text" id="newDept"></div>
+      <div class="input-group">
+        <label>الشفت:</label>
+        <select id="newShift"><option>صباحي</option><option>مسائي</option><option>شفت كامل</option></select>
+      </div>
+      <button class="btn-primary" onclick="submitNewEmp()">حفظ وتوليد الحساب</button>
+      <div id="newEmpCard" style="display: none;"></div>
+    </div>
+
   </div>
 
   <script>
-    const ADMIN_PASSWORD = "123"; 
+    const ADMIN_PIN = "123";
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyawrgkyHORWdXi9FnUnuKz3aCD4GmRifncv1WsHR7Mwe12s5OU7Cf9Tzr48vvN7aTA/exec";
 
-    function checkAdminLogin() {
-      const pin = document.getElementById('adminPin').value.trim();
-      if (pin === ADMIN_PASSWORD) {
-        document.getElementById('loginCard').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
+    function verifyAdmin() {
+      if (document.getElementById('adminPin').value.trim() === ADMIN_PIN) {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('adminDashboard').style.display = 'block';
+        fetchDashboardData();
       } else {
-        const msg = document.getElementById('loginMsg');
-        msg.textContent = 'رمز المرور غير صحيح!';
-        msg.className = 'status-box error';
-        msg.style.display = 'block';
+        document.getElementById('loginError').style.display = 'block';
       }
     }
 
-    async function submitNewEmployee() {
-      const name = document.getElementById('fullName').value.trim();
-      const nId = document.getElementById('nationalId').value.trim();
-      const dept = document.getElementById('department').value.trim();
-      const shift = document.getElementById('shiftType').value;
-      const msg = document.getElementById('adminMsg');
-
-      if (!name || !nId || !dept) {
-        msg.textContent = 'يرجى ملء جميع الحقول المطلوبة.';
-        msg.className = 'status-box error';
-        msg.style.display = 'block';
-        return;
+    async function fetchDashboardData() {
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getDashboardData' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          renderDashboard(data.result);
+        }
+      } catch (e) {
+        console.error(e);
       }
+    }
 
-      msg.textContent = 'جاري تسجيل الموظف وتوليد البيانات...';
-      msg.className = 'status-box';
-      msg.style.display = 'block';
+    function renderDashboard(data) {
+      document.getElementById('statTotal').textContent = data.totalEmployees;
+      document.getElementById('statPresent').textContent = data.presentCount;
+      document.getElementById('statBreak').textContent = data.onBreakCount;
+      document.getElementById('statLate').textContent = data.lateCount;
+
+      const breakBody = document.getElementById('breakTableBody');
+      breakBody.innerHTML = data.onBreakList.length ? data.onBreakList.map(b => 
+        `<tr><td><b>${b.name}</b></td><td>${b.code}</td><td>${b.startTime}</td></tr>`
+      ).join('') : '<tr><td colspan="3" style="text-align:center;">لا يوجد أحد في بريك الآن</td></tr>';
+
+      const lateBody = document.getElementById('lateTableBody');
+      lateBody.innerHTML = data.lateList.length ? data.lateList.map(l => 
+        `<tr><td><b>${l.name}</b></td><td>${l.code}</td><td style="color:red;">${l.time}</td></tr>`
+      ).join('') : '<tr><td colspan="3" style="text-align:center;">لا توجد حالات تأخير مسجلة</td></tr>';
+
+      const leaveBody = document.getElementById('leaveTableBody');
+      leaveBody.innerHTML = data.pendingLeaves.length ? data.pendingLeaves.map(lv => 
+        `<tr>
+          <td><b>${lv.name}</b></td><td>${lv.type}</td><td>${lv.from} إلى ${lv.to}</td>
+          <td>
+            <button class="btn-action btn-approve" onclick="makeDecision('leave', ${lv.rowIndex}, 'Approved')">قبول</button>
+            <button class="btn-action btn-reject" onclick="makeDecision('leave', ${lv.rowIndex}, 'Rejected')">رفض</button>
+          </td>
+        </tr>`
+      ).join('') : '<tr><td colspan="4" style="text-align:center;">لا توجد طلبات إجازة معلقة</td></tr>';
+
+      const permBody = document.getElementById('permTableBody');
+      permBody.innerHTML = data.pendingPerms.length ? data.pendingPerms.map(p => 
+        `<tr>
+          <td><b>${p.name}</b></td><td>من ${p.fromTime} إلى ${p.toTime}</td><td>${p.reason}</td>
+          <td>
+            <button class="btn-action btn-approve" onclick="makeDecision('perm', ${p.rowIndex}, 'Approved')">قبول</button>
+            <button class="btn-action btn-reject" onclick="makeDecision('perm', ${p.rowIndex}, 'Rejected')">رفض</button>
+          </td>
+        </tr>`
+      ).join('') : '<tr><td colspan="4" style="text-align:center;">لا توجد طلبات أذونات معلقة</td></tr>';
+    }
+
+    async function makeDecision(type, rowIndex, status) {
+      if (!confirm(`هل أنت متأكد من ${status === 'Approved' ? 'قبول' : 'رفض'} هذا الطلب؟`)) return;
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'decideRequest', sheetType: type, rowIndex: rowIndex, status: status })
+        });
+        fetchDashboardData();
+      } catch (e) {
+        alert('حدث خطأ أثناء حفظ القرار.');
+      }
+    }
+
+    async function submitNewEmp() {
+      const name = document.getElementById('newName').value.trim();
+      const nid = document.getElementById('newNId').value.trim();
+      const dept = document.getElementById('newDept').value.trim();
+      const shift = document.getElementById('newShift').value;
+      const card = document.getElementById('newEmpCard');
+
+      if (!name || !nid || !dept) return alert('يرجى استكمال جميع البيانات.');
 
       try {
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
           redirect: 'follow',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'createEmployee',
-            fullName: name,
-            nationalId: nId,
-            department: dept,
-            shiftType: shift
-          })
+          body: JSON.stringify({ action: 'createEmployee', fullName: name, nationalId: nid, department: dept, shiftType: shift })
         });
-
-        const data = await res.json();
-
-        if (data && data.success && data.result) {
-          const emp = data.result;
-          msg.className = 'status-box success';
-          msg.innerHTML = `
-            <div style="font-weight: bold; font-size: 14px;">✅ تم إنشاء الحساب بنجاح!</div>
-            <div class="credential-card">
-              <div class="cred-row"><span>اسم الموظف:</span><b>${emp.name}</b></div>
-              <div class="cred-row"><span>كود الدخول:</span><span class="cred-val" style="color: #2563eb;">${emp.code}</span></div>
-              <div class="cred-row"><span>كلمة المرور:</span><span class="cred-val" style="color: #d97706;">${emp.password}</span></div>
-              <button type="button" class="copy-btn" onclick="copyCredentials('${emp.name}', '${emp.code}', '${emp.password}')">📋 نسخ بيانات الدخول</button>
-            </div>
-          `;
-          document.getElementById('fullName').value = '';
-          document.getElementById('nationalId').value = '';
-          document.getElementById('department').value = '';
-        } else {
-          msg.textContent = (data && data.error) ? data.error : 'تعذر إتمام العملية.';
-          msg.className = 'status-box error';
+        const d = await res.json();
+        if (d.success) {
+          card.innerHTML = `<div class="credential-card">✅ تم الإنشاء: <b>${d.result.name}</b><br>كود الموظف: <b>${d.result.code}</b> | كلمة المرور: <b>${d.result.password}</b></div>`;
+          card.style.display = 'block';
+          document.getElementById('newName').value = '';
+          document.getElementById('newNId').value = '';
+          document.getElementById('newDept').value = '';
+          fetchDashboardData();
         }
-      } catch (e) {
-        msg.textContent = 'حدث خطأ في قراءة الرد. يرجى مراجعة شيت Employees للتأكد من تسجيل الحساب.';
-        msg.className = 'status-box error';
+      } catch(e) {
+        alert('حدث خطأ أثناء إضافة الموظف.');
       }
-    }
-
-    function copyCredentials(name, code, pass) {
-      const textToCopy = `بيانات دخول نظام الحضور والانصراف (MAKAN HR):\nالموظف: ${name}\nكود الموظف: ${code}\nكلمة المرور: ${pass}`;
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('تم نسخ بيانات الموظف بنجاح!');
-      });
     }
   </script>
 </body>
