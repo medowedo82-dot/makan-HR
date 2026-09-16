@@ -3,24 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKAN HR - بوابة الموظف الذكية</title>
+  <title>MAKAN HR - بوابة الموظف</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
-    .card { background: #fff; width: 100%; max-width: 440px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 22px; text-align: center; }
+    .card { background: #fff; width: 100%; max-width: 440px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 20px; text-align: center; }
     .logo { font-size: 26px; font-weight: bold; color: #1a73e8; margin-bottom: 2px; }
     .subtitle { color: #5f6368; font-size: 13px; margin-bottom: 15px; }
     
-    .live-clock { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 10px; padding: 8px; margin-bottom: 15px; }
+    .live-clock { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 10px; padding: 8px; margin-bottom: 12px; }
     .clock-time { font-size: 22px; font-weight: 700; color: #202124; }
     .clock-date { font-size: 12px; color: #70757a; margin-top: 2px; }
 
+    .employee-stats-card { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .stat-item { background: #f1f5f9; padding: 12px; border-radius: 10px; text-align: center; border-bottom: 3px solid #cbd5e1; }
+    .stat-item.work { border-color: #10b981; }
+    .stat-item.break { border-color: #f59e0b; }
+    .stat-title { font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 4px; }
+    .stat-number { font-size: 18px; font-weight: bold; color: #1e293b; }
+
     .emp-badge { background: #e8f0fe; color: #1967d2; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-    .logout-link { color: #d93025; cursor: pointer; text-decoration: underline; font-size: 12px; border: none; background: none; }
+    .top-actions { display: flex; gap: 10px; }
+    .link-btn { cursor: pointer; text-decoration: underline; font-size: 12px; border: none; background: none; font-weight: 600; }
+    .logout-link { color: #d93025; }
+    .pw-link { color: #1a73e8; }
 
     .input-group { margin-bottom: 12px; text-align: right; }
     label { display: block; font-size: 12px; font-weight: 600; color: #3c4043; margin-bottom: 4px; }
-    input, select, textarea { width: 100%; padding: 10px; border: 1.5px solid #dadce0; border-radius: 8px; font-size: 14px; outline: none; }
+    input, select { width: 100%; padding: 10px; border: 1.5px solid #dadce0; border-radius: 8px; font-size: 14px; outline: none; }
     
     .btn-login { width: 100%; padding: 13px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
 
@@ -32,9 +42,9 @@
     .btn-break-start { background-color: #e37400; color: white; }
     .btn-break-end { background-color: #1a73e8; color: white; }
     .btn-checkout { background-color: #d93025; color: white; grid-column: span 2; }
-    
     .btn-request { background-color: #6366f1; color: white; }
     .btn-perm { background-color: #0891b2; color: white; }
+    .btn-history { background-color: #475569; color: white; grid-column: span 2; }
 
     .status-box { margin-top: 15px; padding: 12px; border-radius: 8px; font-size: 13px; display: none; line-height: 1.4; }
     .success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
@@ -42,15 +52,21 @@
     .loading-info { background-color: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
     .loading { opacity: 0.6; pointer-events: none; }
 
-    /* الكاميرا */
     #cameraModal { display: none; margin-top: 15px; background: #000; padding: 10px; border-radius: 12px; }
     #videoPreview { width: 100%; border-radius: 8px; transform: scaleX(-1); }
     .cam-btn { background: #0d904f; color: #fff; padding: 10px; border: none; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 8px; cursor: pointer; }
 
-    /* نوافذ الطلبات */
     .modal-box { display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-top: 15px; text-align: right; }
     .modal-title { font-weight: bold; margin-bottom: 10px; text-align: center; color: #1e293b; }
-    .btn-cancel { background: #94a3b8; color: white; margin-top: 5px; }
+    .btn-cancel { background: #94a3b8; color: white; margin-top: 8px; }
+
+    .history-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: right; margin-top: 8px; }
+    .history-table th, .history-table td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; }
+    .history-table th { background: #f1f5f9; color: #64748b; }
+    .badge-status { padding: 3px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; }
+    .badge-approved { background: #dcfce7; color: #166534; }
+    .badge-rejected { background: #fee2e2; color: #991b1b; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
   </style>
 </head>
 <body>
@@ -71,7 +87,7 @@
     <div id="loginStatus" class="status-box"></div>
   </div>
 
-  <!-- 2. لوحة الموظف والحركات -->
+  <!-- 2. لوحة تحكم الموظف بعد الدخول -->
   <div class="card" id="actionsCard" style="display: none;">
     <div class="logo">MAKAN HR</div>
     <div class="subtitle">بوابة الخدمة الذاتية لتسجيل الحضور والاستراحة</div>
@@ -83,23 +99,69 @@
 
     <div class="emp-badge">
       <span>مرحباً، <b id="empDisplayName">--</b> (<span id="empDisplayCode">--</span>)</span>
-      <button class="logout-link" onclick="logoutEmployee()">خروج</button>
+      <div class="top-actions">
+        <button class="link-btn pw-link" onclick="toggleModal('pwModal')">🔑 الباسورد</button>
+        <button class="link-btn logout-link" onclick="logoutEmployee()">خروج</button>
+      </div>
     </div>
 
-    <!-- كاميرا السيلفي -->
+    <!-- العدادات الحية لساعات العمل والبريك -->
+    <div class="employee-stats-card">
+      <div class="stat-item work">
+        <div class="stat-title">⏱️ ساعات العمل اليوم</div>
+        <div class="stat-number" id="dispWorkHours">0.00 ساعة</div>
+      </div>
+      <div class="stat-item break">
+        <div class="stat-title">☕ إجمالي البريك اليوم</div>
+        <div class="stat-number" id="dispBreakMinutes">0 دقيقة</div>
+      </div>
+    </div>
+
+    <!-- كاميرا السيلفي للتحقق من الحضور -->
     <div id="cameraModal">
       <video id="videoPreview" autoplay playsinline></video>
       <button class="cam-btn" onclick="captureAndCheckIn()">📸 التقاط وتأكيد الحضور</button>
     </div>
 
-    <!-- شبكة أزرار العمليات -->
+    <!-- أزرار العمليات والطلبات -->
     <div class="btn-grid" id="actionButtons">
       <button class="action-btn btn-checkin" onclick="startCheckInProcess()">✅ تسجيل حضور</button>
       <button class="action-btn btn-break-start" onclick="sendAction('startBreak')">☕ خروج استراحة</button>
       <button class="action-btn btn-break-end" onclick="sendAction('endBreak')">🔙 رجوع من البريك</button>
       <button class="action-btn btn-request" onclick="toggleModal('leaveModal')">🌴 طلب إجازة</button>
-      <button class="action-btn btn-perm" onclick="toggleModal('permModal')">🚪 إذن / انصراف مبكر</button>
+      <button class="action-btn btn-perm" onclick="toggleModal('permModal')">🚪 إذن / انصراف</button>
       <button class="action-btn btn-checkout" onclick="sendAction('checkOut')">🚪 انصراف ونهاية اليوم</button>
+      <button class="action-btn btn-history" onclick="openRequestsHistory()">📋 سجل ومتابعة طلباتي</button>
+    </div>
+
+    <!-- نافذة متابعة الطلبات المقبولة والمرفوضة -->
+    <div class="modal-box" id="historyModal">
+      <div class="modal-title">📋 سجل ومتابعة طلباتي</div>
+      <div style="max-height: 220px; overflow-y: auto;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>النوع</th>
+              <th>التفاصيل</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr><td colspan="3" style="text-align: center;">جاري جلب الطلبات...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('historyModal')">إغلاق</button>
+    </div>
+
+    <!-- نافذة تغيير كلمة المرور -->
+    <div class="modal-box" id="pwModal">
+      <div class="modal-title">🔑 تغيير كلمة المرور</div>
+      <div class="input-group"><label>كلمة المرور الحالية:</label><input type="password" id="oldPw"></div>
+      <div class="input-group"><label>كلمة المرور الجديدة:</label><input type="password" id="newPw"></div>
+      <div class="input-group"><label>تأكيد كلمة المرور الجديدة:</label><input type="password" id="confirmPw"></div>
+      <button class="action-btn" style="background:#2563eb; color:white; width:100%;" onclick="submitPasswordChange()">حفظ التغيير</button>
+      <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('pwModal')">إلغاء</button>
     </div>
 
     <!-- نافذة طلب إجازة -->
@@ -111,7 +173,7 @@
       </div>
       <div class="input-group"><label>من تاريخ:</label><input type="date" id="leaveFrom"></div>
       <div class="input-group"><label>إلى تاريخ:</label><input type="date" id="leaveTo"></div>
-      <div class="input-group"><label>السبب:</label><input type="text" id="leaveReason" placeholder="سبب الإجازة"></div>
+      <div class="input-group"><label>السبب:</label><input type="text" id="leaveReason"></div>
       <button class="action-btn btn-request" style="width: 100%;" onclick="submitLeave()">إرسال الطلب</button>
       <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('leaveModal')">إلغاء</button>
     </div>
@@ -122,7 +184,7 @@
       <div class="input-group"><label>التاريخ:</label><input type="date" id="permDate"></div>
       <div class="input-group"><label>من الساعة:</label><input type="time" id="permFrom"></div>
       <div class="input-group"><label>إلى الساعة:</label><input type="time" id="permTo"></div>
-      <div class="input-group"><label>السبب:</label><input type="text" id="permReason" placeholder="سبب الإذن أو الانصراف"></div>
+      <div class="input-group"><label>السبب:</label><input type="text" id="permReason"></div>
       <button class="action-btn btn-perm" style="width: 100%;" onclick="submitPerm()">إرسال الطلب</button>
       <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('permModal')">إلغاء</button>
     </div>
@@ -157,7 +219,6 @@
       const statusBox = document.getElementById('loginStatus');
 
       if (!code || !pass) return showMsg(statusBox, 'يرجى إدخال الكود وكلمة المرور.', 'error');
-
       showMsg(statusBox, 'جاري التحقق من الحساب...', 'loading-info');
 
       try {
@@ -181,6 +242,21 @@
       document.getElementById('empDisplayCode').textContent = code;
       document.getElementById('loginCard').style.display = 'none';
       document.getElementById('actionsCard').style.display = 'block';
+      fetchEmployeeStats(code);
+    }
+
+    async function fetchEmployeeStats(code) {
+      try {
+        const url = `${SCRIPT_URL}?action=getStats&code=${encodeURIComponent(code)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const data = await res.json();
+        if (data && data.success) {
+          document.getElementById('dispWorkHours').textContent = `${data.result.workHours} ساعة`;
+          document.getElementById('dispBreakMinutes').textContent = `${data.result.totalBreakMinutes} دقيقة`;
+        }
+      } catch (e) {
+        console.warn('تعذر جلب الإحصائيات');
+      }
     }
 
     function logoutEmployee() {
@@ -191,7 +267,81 @@
 
     function toggleModal(modalId) {
       const modal = document.getElementById(modalId);
-      modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+      const isVisible = modal.style.display === 'block';
+      document.querySelectorAll('.modal-box').forEach(m => m.style.display = 'none');
+      modal.style.display = isVisible ? 'none' : 'block';
+    }
+
+    async function openRequestsHistory() {
+      const user = JSON.parse(localStorage.getItem('makan_user'));
+      if (!user) return;
+
+      toggleModal('historyModal');
+      const tableBody = document.getElementById('historyTableBody');
+      tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">جاري تحميل سجل طلباتك...</td></tr>';
+
+      try {
+        const url = `${SCRIPT_URL}?action=getMyRequests&code=${encodeURIComponent(user.code)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const data = await res.json();
+
+        if (data && data.success && data.result.requests.length > 0) {
+          tableBody.innerHTML = data.result.requests.map(req => {
+            let badgeClass = 'badge-pending';
+            let statusText = 'قيد المراجعة';
+            if (req.status === 'Approved' || req.status === 'مقبول') {
+              badgeClass = 'badge-approved';
+              statusText = 'مقبول ✅';
+            } else if (req.status === 'Rejected' || req.status === 'مرفوض') {
+              badgeClass = 'badge-rejected';
+              statusText = 'مرفوض ❌';
+            }
+            return `
+              <tr>
+                <td><b>${req.type}</b></td>
+                <td><span style="color:#475569;">${req.details}</span><br><small style="color:#64748b;">${req.reason || ''}</small></td>
+                <td><span class="badge-status ${badgeClass}">${statusText}</span></td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات مسجلة لك حتى الآن.</td></tr>';
+        }
+      } catch (e) {
+        tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">فشل جلب الطلبات، تأكد من الاتصال.</td></tr>';
+      }
+    }
+
+    async function submitPasswordChange() {
+      const user = JSON.parse(localStorage.getItem('makan_user'));
+      const oldPw = document.getElementById('oldPw').value.trim();
+      const newPw = document.getElementById('newPw').value.trim();
+      const confirmPw = document.getElementById('confirmPw').value.trim();
+      const statusBox = document.getElementById('actionStatus');
+
+      if (!oldPw || !newPw || !confirmPw) return alert('يرجى ملء جميع حقول تغيير كلمة المرور.');
+      if (newPw !== confirmPw) return alert('كلمة المرور الجديدة وتأكيدها غير متطابقين.');
+      if (newPw.length < 4) return alert('يجب ألا تقل كلمة المرور الجديدة عن 4 خانات.');
+
+      toggleModal('pwModal');
+      showMsg(statusBox, 'جاري تحديث كلمة المرور...', 'loading-info');
+
+      try {
+        const url = `${SCRIPT_URL}?action=changePassword&code=${encodeURIComponent(user.code)}&oldPassword=${encodeURIComponent(oldPw)}&newPassword=${encodeURIComponent(newPw)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const data = await res.json();
+
+        if (data && data.success) {
+          showMsg(statusBox, '✅ ' + data.result.message, 'success');
+          document.getElementById('oldPw').value = '';
+          document.getElementById('newPw').value = '';
+          document.getElementById('confirmPw').value = '';
+        } else {
+          showMsg(statusBox, (data && data.error) ? data.error : 'فشل تغيير كلمة المرور.', 'error');
+        }
+      } catch (e) {
+        showMsg(statusBox, 'حدث خطأ في الاتصال، يرجى المحاولة مرة ثانية.', 'error');
+      }
     }
 
     async function startCheckInProcess() {
@@ -207,12 +357,8 @@
       }
 
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" },
-          audio: false
-        });
-        const video = document.getElementById('videoPreview');
-        video.srcObject = mediaStream;
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+        document.getElementById('videoPreview').srcObject = mediaStream;
         document.getElementById('cameraModal').style.display = 'block';
         document.getElementById('actionButtons').style.display = 'none';
         showMsg(statusBox, 'اضغط على الزر الأخضر لتأكيد صورتك وحضورك.', 'loading-info');
@@ -244,19 +390,18 @@
       const statusBox = document.getElementById('actionStatus');
 
       card.classList.add('loading');
-      showMsg(statusBox, 'جاري إرسال وتوثيق الحركة...', 'loading-info');
+      showMsg(statusBox, 'جاري معالجة الحركة وتسجيلها...', 'loading-info');
 
       try {
         let url = `${SCRIPT_URL}?action=${encodeURIComponent(actionType)}&code=${encodeURIComponent(user.code)}`;
-        if (locationCoords) {
-          url += `&location=${encodeURIComponent(locationCoords)}`;
-        }
+        if (locationCoords) url += `&location=${encodeURIComponent(locationCoords)}`;
 
         const res = await fetch(url, { method: 'GET', redirect: 'follow' });
         const data = await res.json();
 
         if (data && data.success) {
           showMsg(statusBox, data.result.message || 'تمت العملية بنجاح!', 'success');
+          fetchEmployeeStats(user.code);
         } else {
           showMsg(statusBox, (data && data.error) ? data.error : 'حدث خطأ أثناء التنفيذ.', 'error');
         }
@@ -276,7 +421,6 @@
       const statusBox = document.getElementById('actionStatus');
 
       if (!from || !to || !reason) return alert('يرجى ملء كافة تفاصيل الإجازة والسبب.');
-
       toggleModal('leaveModal');
       showMsg(statusBox, 'جاري إرسال طلب الإجازة...', 'loading-info');
 
@@ -299,9 +443,8 @@
       const statusBox = document.getElementById('actionStatus');
 
       if (!date || !from || !to || !reason) return alert('يرجى ملء كافة تفاصيل موعد الإذن والسبب.');
-
       toggleModal('permModal');
-      showMsg(statusBox, 'جاري إرسال طلب الإذن / الانصراف المبكر...', 'loading-info');
+      showMsg(statusBox, 'جاري إرسال طلب الإذن...', 'loading-info');
 
       try {
         const url = `${SCRIPT_URL}?action=submitPerm&code=${encodeURIComponent(user.code)}&date=${encodeURIComponent(date)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&reason=${encodeURIComponent(reason)}`;
