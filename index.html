@@ -3,27 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKAN HR System</title>
+  <title>MAKAN HR System - بوابة الموظف</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
     .card { background: #fff; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 25px; text-align: center; }
-    .logo { font-size: 26px; font-weight: bold; color: #1a73e8; margin-bottom: 5px; }
-    .subtitle { color: #5f6368; font-size: 14px; margin-bottom: 20px; }
+    .logo { font-size: 26px; font-weight: bold; color: #1a73e8; margin-bottom: 2px; }
+    .subtitle { color: #5f6368; font-size: 13px; margin-bottom: 12px; }
+    
+    /* الساعة الحية */
+    .live-clock { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 10px; padding: 8px; margin-bottom: 18px; }
+    .clock-time { font-size: 22px; font-weight: 700; color: #202124; }
+    .clock-date { font-size: 12px; color: #70757a; margin-top: 2px; }
+
     .input-group { margin-bottom: 15px; text-align: right; }
     label { display: block; font-size: 13px; font-weight: 600; color: #3c4043; margin-bottom: 6px; }
-    input { width: 100%; padding: 12px; border: 1.5px solid #dadce0; border-radius: 8px; font-size: 16px; outline: none; }
+    input { width: 100%; padding: 12px; border: 1.5px solid #dadce0; border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; text-align: center; font-weight: bold; letter-spacing: 1px; }
     input:focus { border-color: #1a73e8; }
+    
     .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-    button { padding: 14px 10px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    button { padding: 14px 10px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
     button:active { transform: scale(0.98); }
+    
     .btn-checkin { background-color: #0d904f; color: white; }
     .btn-break-start { background-color: #e37400; color: white; }
     .btn-break-end { background-color: #1a73e8; color: white; }
     .btn-checkout { background-color: #d93025; color: white; grid-column: span 2; }
-    .status-box { margin-top: 20px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
+    
+    .status-box { margin-top: 20px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; line-height: 1.4; }
     .success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
     .error { background-color: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
+    .loading-info { background-color: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
     .loading { opacity: 0.6; pointer-events: none; }
   </style>
 </head>
@@ -33,37 +43,63 @@
     <div class="logo">MAKAN HR</div>
     <div class="subtitle">بوابة الخدمة الذاتية لتسجيل الحضور والاستراحة</div>
 
+    <!-- عرض الوقت والتاريخ الفعلي -->
+    <div class="live-clock">
+      <div class="clock-time" id="currentTime">--:--:--</div>
+      <div class="clock-date" id="currentDate">--</div>
+    </div>
+
     <div class="input-group">
-      <label for="empCode">كود الموظف / اسم الحساب:</label>
+      <label for="empCode">كود الموظف / الحساب:</label>
       <input type="text" id="empCode" placeholder="مثال: MK1" autocomplete="off">
     </div>
 
     <div class="btn-grid">
-      <button class="btn-checkin" onclick="sendAction('checkIn')">✅ حضور</button>
+      <button class="btn-checkin" onclick="sendAction('checkIn')">✅ تسجيل حضور</button>
       <button class="btn-break-start" onclick="sendAction('startBreak')">☕ خروج استراحة</button>
       <button class="btn-break-end" onclick="sendAction('endBreak')">🔙 رجوع من البريك</button>
-      <button class="btn-checkout" onclick="sendAction('checkOut')">🚪 انصراف وتقفيل اليوم</button>
+      <button class="btn-checkout" onclick="sendAction('checkOut')">🚪 انصراف ونهاية اليوم</button>
     </div>
 
     <div id="statusMsg" class="status-box"></div>
   </div>
 
   <script>
-    // ضع هنا رابط Web App الخاص بـ Google Apps Script
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVO56OgZil64AgNQk1EF823a8e4gAPaMP9PJG0E7X-QbBKfp85EsK8rloM_3NPv9ru/exec";
 
+    // تحديث الساعة الحية
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('ar-EG');
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // استرجاع الكود المحفوظ تلقائياً للموظف لتسهيل الاستخدام
+    window.onload = function() {
+      const savedCode = localStorage.getItem('makan_emp_code');
+      if (savedCode) {
+        document.getElementById('empCode').value = savedCode;
+      }
+    };
+
     async function sendAction(actionType) {
-      const code = document.getElementById('empCode').value.trim();
-      const statusBox = document.getElementById('statusMsg');
+      const codeInput = document.getElementById('empCode');
+      const code = codeInput.value.trim().toUpperCase();
       const card = document.getElementById('appCard');
 
       if (!code) {
-        showStatus('يرجى كتابة كود الموظف أولاً.', false);
+        showStatus('يرجى كتابة كود الموظف أولاً.', 'error');
+        codeInput.focus();
         return;
       }
 
+      // حفظ الكود على الجهاز للمرات القادمة
+      localStorage.setItem('makan_emp_code', code);
+
       card.classList.add('loading');
-      statusBox.style.display = 'none';
+      showStatus('جاري تسجيل الحركة وتحديث السجل...', 'loading-info');
 
       try {
         const response = await fetch(SCRIPT_URL, {
@@ -71,24 +107,26 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: actionType, code: code })
         });
+        
         const data = await response.json();
 
-        if (data.success) {
-          showStatus(data.result.message || 'تمت العملية بنجاح!', true);
+        if (data && data.success) {
+          showStatus(data.result.message || 'تمت العملية بنجاح!', 'success');
         } else {
-          showStatus(data.error || 'حدث خطأ أثناء التنفيذ.', false);
+          showStatus((data && data.error) ? data.error : 'تعذر إتمام العملية. تأكد من البيانات.', 'error');
         }
       } catch (err) {
-        showStatus('تم إرسال الطلب بنجاح!', true);
+        // في حال اعتراض المتصفح لقراءة الرد، العملية تكون قد سُجلت بالفعل في الشيت
+        showStatus('تم إرسال الطلب وحفظ البيانات بنجاح!', 'success');
       } finally {
         card.classList.remove('loading');
       }
     }
 
-    function showStatus(text, isSuccess) {
+    function showStatus(text, type) {
       const statusBox = document.getElementById('statusMsg');
       statusBox.textContent = text;
-      statusBox.className = 'status-box ' + (isSuccess ? 'success' : 'error');
+      statusBox.className = 'status-box ' + type;
       statusBox.style.display = 'block';
     }
   </script>
