@@ -3,31 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKAN HR System - بوابة الموظف</title>
+  <title>MAKAN HR - بوابة الموظف الذكية</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
-    .card { background: #fff; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 25px; text-align: center; }
+    .card { background: #fff; width: 100%; max-width: 440px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 22px; text-align: center; }
     .logo { font-size: 26px; font-weight: bold; color: #1a73e8; margin-bottom: 2px; }
     .subtitle { color: #5f6368; font-size: 13px; margin-bottom: 15px; }
     
-    .live-clock { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 10px; padding: 8px; margin-bottom: 18px; }
+    .live-clock { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 10px; padding: 8px; margin-bottom: 15px; }
     .clock-time { font-size: 22px; font-weight: 700; color: #202124; }
     .clock-date { font-size: 12px; color: #70757a; margin-top: 2px; }
 
     .emp-badge { background: #e8f0fe; color: #1967d2; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-    .logout-link { color: #d93025; cursor: pointer; text-decoration: underline; font-size: 12px; border: none; background: none; padding: 0; }
+    .logout-link { color: #d93025; cursor: pointer; text-decoration: underline; font-size: 12px; border: none; background: none; }
 
-    .input-group { margin-bottom: 14px; text-align: right; }
-    label { display: block; font-size: 13px; font-weight: 600; color: #3c4043; margin-bottom: 6px; }
-    input { width: 100%; padding: 12px; border: 1.5px solid #dadce0; border-radius: 8px; font-size: 15px; outline: none; transition: 0.2s; }
-    input:focus { border-color: #1a73e8; }
+    .input-group { margin-bottom: 12px; text-align: right; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #3c4043; margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1.5px solid #dadce0; border-radius: 8px; font-size: 14px; outline: none; }
     
     .btn-login { width: 100%; padding: 13px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-    .btn-login:active { transform: scale(0.98); }
 
-    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-    button.action-btn { padding: 14px 10px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+    button.action-btn { padding: 12px 8px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     button.action-btn:active { transform: scale(0.98); }
     
     .btn-checkin { background-color: #0d904f; color: white; }
@@ -35,35 +33,45 @@
     .btn-break-end { background-color: #1a73e8; color: white; }
     .btn-checkout { background-color: #d93025; color: white; grid-column: span 2; }
     
-    .status-box { margin-top: 18px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; line-height: 1.4; }
+    .btn-request { background-color: #6366f1; color: white; }
+    .btn-perm { background-color: #0891b2; color: white; }
+
+    .status-box { margin-top: 15px; padding: 12px; border-radius: 8px; font-size: 13px; display: none; line-height: 1.4; }
     .success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
     .error { background-color: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
     .loading-info { background-color: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
     .loading { opacity: 0.6; pointer-events: none; }
+
+    /* الكاميرا */
+    #cameraModal { display: none; margin-top: 15px; background: #000; padding: 10px; border-radius: 12px; }
+    #videoPreview { width: 100%; border-radius: 8px; transform: scaleX(-1); }
+    .cam-btn { background: #0d904f; color: #fff; padding: 10px; border: none; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 8px; cursor: pointer; }
+
+    /* نوافذ الطلبات */
+    .modal-box { display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-top: 15px; text-align: right; }
+    .modal-title { font-weight: bold; margin-bottom: 10px; text-align: center; color: #1e293b; }
+    .btn-cancel { background: #94a3b8; color: white; margin-top: 5px; }
   </style>
 </head>
 <body>
 
-  <!-- 1. شاشة تسجيل دخول الموظف -->
+  <!-- 1. شاشة تسجيل الدخول -->
   <div class="card" id="loginCard">
     <div class="logo">MAKAN HR</div>
     <div class="subtitle">تسجيل دخول الموظف</div>
-
     <div class="input-group">
-      <label for="loginCode">كود الموظف:</label>
-      <input type="text" id="loginCode" placeholder="مثال: MK101" autocomplete="off" style="text-align: center; text-transform: uppercase;">
+      <label>كود الموظف:</label>
+      <input type="text" id="loginCode" placeholder="مثال: MK2" style="text-align: center; text-transform: uppercase;">
     </div>
-
     <div class="input-group">
-      <label for="loginPass">كلمة المرور:</label>
+      <label>كلمة المرور:</label>
       <input type="password" id="loginPass" placeholder="••••" style="text-align: center;">
     </div>
-
     <button class="btn-login" onclick="loginEmployee()">تسجيل الدخول</button>
     <div id="loginStatus" class="status-box"></div>
   </div>
 
-  <!-- 2. شاشة الحركات (تظهر بعد الدخول) -->
+  <!-- 2. لوحة الموظف والحركات -->
   <div class="card" id="actionsCard" style="display: none;">
     <div class="logo">MAKAN HR</div>
     <div class="subtitle">بوابة الخدمة الذاتية لتسجيل الحضور والاستراحة</div>
@@ -78,11 +86,45 @@
       <button class="logout-link" onclick="logoutEmployee()">خروج</button>
     </div>
 
-    <div class="btn-grid">
-      <button class="action-btn btn-checkin" onclick="sendAction('checkIn')">✅ تسجيل حضور</button>
+    <!-- كاميرا السيلفي -->
+    <div id="cameraModal">
+      <video id="videoPreview" autoplay playsinline></video>
+      <button class="cam-btn" onclick="captureAndCheckIn()">📸 التقاط وتأكيد الحضور</button>
+    </div>
+
+    <!-- شبكة أزرار العمليات -->
+    <div class="btn-grid" id="actionButtons">
+      <button class="action-btn btn-checkin" onclick="startCheckInProcess()">✅ تسجيل حضور</button>
       <button class="action-btn btn-break-start" onclick="sendAction('startBreak')">☕ خروج استراحة</button>
       <button class="action-btn btn-break-end" onclick="sendAction('endBreak')">🔙 رجوع من البريك</button>
+      <button class="action-btn btn-request" onclick="toggleModal('leaveModal')">🌴 طلب إجازة</button>
+      <button class="action-btn btn-perm" onclick="toggleModal('permModal')">🚪 إذن / انصراف مبكر</button>
       <button class="action-btn btn-checkout" onclick="sendAction('checkOut')">🚪 انصراف ونهاية اليوم</button>
+    </div>
+
+    <!-- نافذة طلب إجازة -->
+    <div class="modal-box" id="leaveModal">
+      <div class="modal-title">🌴 نموذج طلب إجازة</div>
+      <div class="input-group">
+        <label>نوع الإجازة:</label>
+        <select id="leaveType"><option>سنوية</option><option>عارضة</option><option>مرضي</option></select>
+      </div>
+      <div class="input-group"><label>من تاريخ:</label><input type="date" id="leaveFrom"></div>
+      <div class="input-group"><label>إلى تاريخ:</label><input type="date" id="leaveTo"></div>
+      <div class="input-group"><label>السبب:</label><input type="text" id="leaveReason" placeholder="سبب الإجازة"></div>
+      <button class="action-btn btn-request" style="width: 100%;" onclick="submitLeave()">إرسال الطلب</button>
+      <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('leaveModal')">إلغاء</button>
+    </div>
+
+    <!-- نافذة طلب إذن / انصراف مبكر -->
+    <div class="modal-box" id="permModal">
+      <div class="modal-title">🚪 طلب إذن / انصراف مبكر</div>
+      <div class="input-group"><label>التاريخ:</label><input type="date" id="permDate"></div>
+      <div class="input-group"><label>من الساعة:</label><input type="time" id="permFrom"></div>
+      <div class="input-group"><label>إلى الساعة:</label><input type="time" id="permTo"></div>
+      <div class="input-group"><label>السبب:</label><input type="text" id="permReason" placeholder="سبب الإذن أو الانصراف"></div>
+      <button class="action-btn btn-perm" style="width: 100%;" onclick="submitPerm()">إرسال الطلب</button>
+      <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('permModal')">إلغاء</button>
     </div>
 
     <div id="actionStatus" class="status-box"></div>
@@ -90,6 +132,8 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyawrgkyHORWdXi9FnUnuKz3aCD4GmRifncv1WsHR7Mwe12s5OU7Cf9Tzr48vvN7aTA/exec";
+    let mediaStream = null;
+    let userLocation = "";
 
     function updateClock() {
       const now = new Date();
@@ -111,33 +155,24 @@
       const code = document.getElementById('loginCode').value.trim().toUpperCase();
       const pass = document.getElementById('loginPass').value.trim();
       const statusBox = document.getElementById('loginStatus');
-      const card = document.getElementById('loginCard');
 
-      if (!code || !pass) {
-        showMsg(statusBox, 'يرجى إدخال الكود وكلمة المرور.', 'error');
-        return;
-      }
+      if (!code || !pass) return showMsg(statusBox, 'يرجى إدخال الكود وكلمة المرور.', 'error');
 
-      card.classList.add('loading');
       showMsg(statusBox, 'جاري التحقق من الحساب...', 'loading-info');
 
       try {
         const url = `${SCRIPT_URL}?action=login&code=${encodeURIComponent(code)}&password=${encodeURIComponent(pass)}`;
         const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-        const text = await res.text();
-        const data = JSON.parse(text);
+        const data = await res.json();
 
         if (data && data.success) {
-          const user = { code: code, name: data.result.name };
-          localStorage.setItem('makan_user', JSON.stringify(user));
-          showDashboard(user.name, user.code);
+          localStorage.setItem('makan_user', JSON.stringify({ code: code, name: data.result.name }));
+          showDashboard(data.result.name, code);
         } else {
-          showMsg(statusBox, (data && data.error) ? data.error : 'كود الموظف أو كلمة المرور غير صحيحة.', 'error');
+          showMsg(statusBox, (data && data.error) ? data.error : 'بيانات الدخول غير صحيحة.', 'error');
         }
       } catch (err) {
-        showMsg(statusBox, 'تعذر التحقق، يرجى المحاولة مرة أخرى أو فحص الشبكة.', 'error');
-      } finally {
-        card.classList.remove('loading');
+        showMsg(statusBox, 'تعذر الاتصال، يرجى إعادة المحاولة.', 'error');
       }
     }
 
@@ -149,31 +184,76 @@
     }
 
     function logoutEmployee() {
+      stopCamera();
       localStorage.removeItem('makan_user');
-      document.getElementById('loginPass').value = '';
-      document.getElementById('loginStatus').style.display = 'none';
-      document.getElementById('actionsCard').style.display = 'none';
-      document.getElementById('loginCard').style.display = 'block';
+      location.reload();
     }
 
-    async function sendAction(actionType) {
-      const user = JSON.parse(localStorage.getItem('makan_user'));
-      if (!user || !user.code) {
-        logoutEmployee();
-        return;
+    function toggleModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+    }
+
+    async function startCheckInProcess() {
+      const statusBox = document.getElementById('actionStatus');
+      showMsg(statusBox, 'جاري تشغيل الكاميرا وتحديد الموقع...', 'loading-info');
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => { userLocation = `${pos.coords.latitude},${pos.coords.longitude}`; },
+          err => { userLocation = ""; },
+          { enableHighAccuracy: true, timeout: 7000 }
+        );
       }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+          audio: false
+        });
+        const video = document.getElementById('videoPreview');
+        video.srcObject = mediaStream;
+        document.getElementById('cameraModal').style.display = 'block';
+        document.getElementById('actionButtons').style.display = 'none';
+        showMsg(statusBox, 'اضغط على الزر الأخضر لتأكيد صورتك وحضورك.', 'loading-info');
+      } catch (e) {
+        stopCamera();
+        sendAction('checkIn', userLocation);
+      }
+    }
+
+    function stopCamera() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+      document.getElementById('cameraModal').style.display = 'none';
+      document.getElementById('actionButtons').style.display = 'grid';
+    }
+
+    function captureAndCheckIn() {
+      stopCamera();
+      sendAction('checkIn', userLocation);
+    }
+
+    async function sendAction(actionType, locationCoords = "") {
+      const user = JSON.parse(localStorage.getItem('makan_user'));
+      if (!user) return logoutEmployee();
 
       const card = document.getElementById('actionsCard');
       const statusBox = document.getElementById('actionStatus');
 
       card.classList.add('loading');
-      showMsg(statusBox, 'جاري معالجة الحركة وتسجيلها...', 'loading-info');
+      showMsg(statusBox, 'جاري إرسال وتوثيق الحركة...', 'loading-info');
 
       try {
-        const url = `${SCRIPT_URL}?action=${encodeURIComponent(actionType)}&code=${encodeURIComponent(user.code)}`;
+        let url = `${SCRIPT_URL}?action=${encodeURIComponent(actionType)}&code=${encodeURIComponent(user.code)}`;
+        if (locationCoords) {
+          url += `&location=${encodeURIComponent(locationCoords)}`;
+        }
+
         const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-        const text = await res.text();
-        const data = JSON.parse(text);
+        const data = await res.json();
 
         if (data && data.success) {
           showMsg(statusBox, data.result.message || 'تمت العملية بنجاح!', 'success');
@@ -181,9 +261,55 @@
           showMsg(statusBox, (data && data.error) ? data.error : 'حدث خطأ أثناء التنفيذ.', 'error');
         }
       } catch (err) {
-        showMsg(statusBox, 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.', 'error');
+        showMsg(statusBox, 'حدث خطأ في الاتصال، يرجى المحاولة مرة ثانية.', 'error');
       } finally {
         card.classList.remove('loading');
+      }
+    }
+
+    async function submitLeave() {
+      const user = JSON.parse(localStorage.getItem('makan_user'));
+      const type = document.getElementById('leaveType').value;
+      const from = document.getElementById('leaveFrom').value;
+      const to = document.getElementById('leaveTo').value;
+      const reason = document.getElementById('leaveReason').value.trim();
+      const statusBox = document.getElementById('actionStatus');
+
+      if (!from || !to || !reason) return alert('يرجى ملء كافة تفاصيل الإجازة والسبب.');
+
+      toggleModal('leaveModal');
+      showMsg(statusBox, 'جاري إرسال طلب الإجازة...', 'loading-info');
+
+      try {
+        const url = `${SCRIPT_URL}?action=submitLeave&code=${encodeURIComponent(user.code)}&type=${encodeURIComponent(type)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&reason=${encodeURIComponent(reason)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const data = await res.json();
+        showMsg(statusBox, data.result.message || 'تم إرسال الطلب بنجاح.', 'success');
+      } catch (e) {
+        showMsg(statusBox, 'تعذر إرسال الطلب، تأكد من الاتصال.', 'error');
+      }
+    }
+
+    async function submitPerm() {
+      const user = JSON.parse(localStorage.getItem('makan_user'));
+      const date = document.getElementById('permDate').value;
+      const from = document.getElementById('permFrom').value;
+      const to = document.getElementById('permTo').value;
+      const reason = document.getElementById('permReason').value.trim();
+      const statusBox = document.getElementById('actionStatus');
+
+      if (!date || !from || !to || !reason) return alert('يرجى ملء كافة تفاصيل موعد الإذن والسبب.');
+
+      toggleModal('permModal');
+      showMsg(statusBox, 'جاري إرسال طلب الإذن / الانصراف المبكر...', 'loading-info');
+
+      try {
+        const url = `${SCRIPT_URL}?action=submitPerm&code=${encodeURIComponent(user.code)}&date=${encodeURIComponent(date)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&reason=${encodeURIComponent(reason)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const data = await res.json();
+        showMsg(statusBox, data.result.message || 'تم إرسال الطلب بنجاح.', 'success');
+      } catch (e) {
+        showMsg(statusBox, 'تعذر إرسال الطلب، تأكد من الاتصال.', 'error');
       }
     }
 
