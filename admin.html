@@ -3,43 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة القيادة والتحكم الإداري - MAKAN HR</title>
+  <title>MAKAN HR - لوحة التحكم والعمليات الشاملة</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f1f5f9; margin: 0; padding: 20px; color: #1e293b; }
-    .container { max-width: 1100px; margin: 0 auto; }
+    body { background-color: #f8fafc; margin: 0; padding: 15px; color: #1e293b; }
+    .container { max-width: 1200px; margin: 0 auto; }
     
-    .login-box { background: #fff; width: 100%; max-width: 400px; margin: 100px auto; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); padding: 30px; text-align: center; }
+    .login-box { background: #fff; width: 100%; max-width: 380px; margin: 80px auto; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); padding: 30px; text-align: center; }
     
+    /* كروت تفاعلية بالضغط */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
-    .stat-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; border-right: 5px solid #cbd5e1; }
+    .stat-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; border-right: 6px solid #cbd5e1; cursor: pointer; transition: all 0.2s ease; user-select: none; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.09); }
+    .stat-card:active { transform: scale(0.98); }
     .stat-card.blue { border-color: #2563eb; }
     .stat-card.green { border-color: #10b981; }
     .stat-card.orange { border-color: #f59e0b; }
     .stat-card.red { border-color: #ef4444; }
     .stat-val { font-size: 26px; font-weight: bold; margin-top: 5px; }
+    .stat-hint { font-size: 11px; color: #94a3b8; margin-top: 3px; }
 
     .grid-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-    @media (max-width: 768px) { .grid-sections { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .grid-sections { grid-template-columns: 1fr; } }
     
-    .panel { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .panel { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 20px; transition: 0.3s; }
     .panel-header { font-size: 16px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
     
+    /* تمييز وتأطير القسم عند الضغط على الكارت */
+    .panel-focus { border: 2px solid #2563eb; box-shadow: 0 0 15px rgba(37,99,235,0.2); }
+
     table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13px; }
     th, td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
     th { background: #f8fafc; color: #64748b; }
     
-    .btn-action { padding: 5px 10px; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .btn-action { padding: 6px 12px; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
     .btn-approve { background: #dcfce7; color: #166534; margin-left: 4px; }
     .btn-reject { background: #fee2e2; color: #991b1b; }
+    .btn-toggle-active { background: #dcfce7; color: #166534; }
+    .btn-toggle-inactive { background: #fee2e2; color: #991b1b; }
     
     .input-group { margin-bottom: 10px; text-align: right; }
     label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569; }
     input, select { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
     button.btn-primary { width: 100%; padding: 11px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     
-    .credential-card { background: #f0fdf4; border: 1px dashed #22c55e; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 13px; }
-    .refresh-btn { background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .credential-card { background: #f0fdf4; border: 1px dashed #22c55e; border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 13px; line-height: 1.6; }
+    .refresh-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -49,9 +58,9 @@
     <h2 style="margin: 0 0 5px 0;">🔐 دخول الإدارة</h2>
     <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">نظام مكان للموارد البشرية</p>
     <div class="input-group">
-      <input type="password" id="adminPin" placeholder="أدخل رمز المرور السري" style="text-align: center;">
+      <input type="password" id="adminPin" placeholder="رمز أمان الإدارة" style="text-align: center;">
     </div>
-    <button class="btn-primary" onclick="verifyAdmin()">دخول لوحة العمليات</button>
+    <button class="btn-primary" onclick="verifyAdmin()">دخول لوحة التحكم</button>
     <div id="loginError" style="color: red; font-size: 12px; margin-top: 10px; display: none;">رمز المرور غير صحيح!</div>
   </div>
 
@@ -60,81 +69,167 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <div>
         <h2 style="margin: 0;">لوحة القيادة والتحكم الإداري</h2>
-        <span style="font-size: 13px; color: #64748b;">متابعة فورية للحضور والانصراف والأذونات</span>
+        <span style="font-size: 13px; color: #64748b;">اضغط على أي كارت بالأسفل لعرض تفاصيله المباشرة فوراً</span>
       </div>
       <button class="refresh-btn" onclick="fetchDashboardData()">🔄 تحديث البيانات</button>
     </div>
 
-    <!-- مؤشرات الأداء والعدادات الحية -->
+    <!-- الكروت التفاعلية الأربعة -->
     <div class="stats-grid">
-      <div class="stat-card blue">
-        <div><div style="font-size: 12px; color: #64748b;">إجمالي الموظفين</div><div class="stat-val" id="statTotal">--</div></div>
-        <div style="font-size: 30px;">👥</div>
+      
+      <!-- 1. كارت إجمالي الموظفين -->
+      <div class="stat-card blue" onclick="focusSection('secEmployees')">
+        <div>
+          <div style="font-size: 13px; color: #64748b;">إجمالي الموظفين</div>
+          <div class="stat-val" id="statTotal">--</div>
+          <div class="stat-hint">👈 اضغط لعرض الدليل</div>
+        </div>
+        <div style="font-size: 32px;">👥</div>
       </div>
-      <div class="stat-card green">
-        <div><div style="font-size: 12px; color: #64748b;">الحاضرون اليوم</div><div class="stat-val" id="statPresent">--</div></div>
-        <div style="font-size: 30px;">✅</div>
+
+      <!-- 2. كارت الحاضرين -->
+      <div class="stat-card green" onclick="focusSection('secPresent')">
+        <div>
+          <div style="font-size: 13px; color: #64748b;">الحاضرون اليوم</div>
+          <div class="stat-val" id="statPresent">--</div>
+          <div class="stat-hint">👈 اضغط لعرض المسجلين</div>
+        </div>
+        <div style="font-size: 32px;">✅</div>
       </div>
-      <div class="stat-card orange">
-        <div><div style="font-size: 12px; color: #64748b;">في البريك الآن</div><div class="stat-val" id="statBreak">--</div></div>
-        <div style="font-size: 30px;">☕</div>
+
+      <!-- 3. كارت البريك -->
+      <div class="stat-card orange" onclick="focusSection('secBreaks')">
+        <div>
+          <div style="font-size: 13px; color: #64748b;">في البريك الآن</div>
+          <div class="stat-val" id="statBreak">--</div>
+          <div class="stat-hint">👈 اضغط للإنهاء والمتابعة</div>
+        </div>
+        <div style="font-size: 32px;">☕</div>
       </div>
-      <div class="stat-card red">
-        <div><div style="font-size: 12px; color: #64748b;">المتأخرون عن الموعد</div><div class="stat-val" id="statLate">--</div></div>
-        <div style="font-size: 30px;">⏰</div>
+
+      <!-- 4. كارت المتأخرين -->
+      <div class="stat-card red" onclick="focusSection('secLate')">
+        <div>
+          <div style="font-size: 13px; color: #64748b;">المتأخرون عن الموعد</div>
+          <div class="stat-val" id="statLate">--</div>
+          <div class="stat-hint">👈 اضغط لعرض الدقائق واللوكيشن</div>
+        </div>
+        <div style="font-size: 32px;">⏰</div>
       </div>
+
     </div>
 
-    <!-- الجداول المباشرة: بريك ومتأخرين -->
+    <!-- قسم الحاضرين اليوم (يفتح عند الضغط على كارت الحاضرون) -->
+    <div class="panel" id="secPresent">
+      <div class="panel-header">
+        <span>✅ الحاضرون اليوم بالتفصيل</span>
+        <span style="font-size: 12px; color: #64748b;" id="presentSubCount"></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>الموظف</th>
+            <th>كود الموظف</th>
+            <th>الشفت</th>
+            <th>وقت الحضور</th>
+            <th>الحالة</th>
+            <th>الموقع الجغرافي</th>
+          </tr>
+        </thead>
+        <tbody id="presentTableBody">
+          <tr><td colspan="6" style="text-align: center;">جاري جلب القائمة...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- قسم البريك وقسم المتأخرين -->
     <div class="grid-sections">
-      <div class="panel">
-        <div class="panel-header">☕ في استراحة الآن</div>
+      
+      <!-- جدول البريك الجاري -->
+      <div class="panel" id="secBreaks">
+        <div class="panel-header">☕ الموظفون في استراحة جارية</div>
         <table>
-          <thead><tr><th>الموظف</th><th>الكود</th><th>وقت البدء</th></tr></thead>
-          <tbody id="breakTableBody"><tr><td colspan="3" style="text-align: center;">لا يوجد أحد في استراحة</td></tr></tbody>
+          <thead>
+            <tr><th>الموظف</th><th>الكود</th><th>وقت البدء</th><th>إجراء</th></tr>
+          </thead>
+          <tbody id="breakTableBody">
+            <tr><td colspan="4" style="text-align: center;">لا يوجد أحد في بريك حالياً</td></tr>
+          </tbody>
         </table>
       </div>
 
-      <div class="panel">
-        <div class="panel-header">⚠️ المتأخرون اليوم</div>
+      <!-- جدول المتأخرين اليوم -->
+      <div class="panel" id="secLate">
+        <div class="panel-header">⚠️ المتأخرون عن مواعيد الشفت</div>
         <table>
-          <thead><tr><th>الموظف</th><th>الكود</th><th>وقت الحضور</th></tr></thead>
-          <tbody id="lateTableBody"><tr><td colspan="3" style="text-align: center;">لا توجد حالات تأخير مسجلة</td></tr></tbody>
+          <thead>
+            <tr><th>الموظف</th><th>الكود</th><th>وقت الحضور</th><th>مدة التأخير</th><th>الموقع</th></tr>
+          </thead>
+          <tbody id="lateTableBody">
+            <tr><td colspan="5" style="text-align: center;">لا توجد حالات تأخير اليوم</td></tr>
+          </tbody>
         </table>
       </div>
+
     </div>
 
     <!-- طلبات الإجازات والأذونات المعلقة -->
     <div class="grid-sections">
-      <div class="panel">
+      
+      <div class="panel" id="secLeaves">
         <div class="panel-header">🌴 طلبات الإجازة المعلقة</div>
         <table>
-          <thead><tr><th>الموظف</th><th>النوع</th><th>الفترة</th><th>القرار</th></tr></thead>
-          <tbody id="leaveTableBody"><tr><td colspan="4" style="text-align: center;">لا توجد طلبات إجازة معلقة</td></tr></tbody>
+          <thead>
+            <tr><th>الموظف</th><th>النوع</th><th>الفترة</th><th>السبب</th><th>القرار</th></tr>
+          </thead>
+          <tbody id="leaveTableBody">
+            <tr><td colspan="5" style="text-align: center;">لا توجد طلبات إجازة معلقة</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel" id="secPerms">
+        <div class="panel-header">🚪 طلبات الأذن والانصراف المبكر</div>
+        <table>
+          <thead>
+            <tr><th>الموظف</th><th>التاريخ</th><th>الوقت</th><th>السبب</th><th>القرار</th></tr>
+          </thead>
+          <tbody id="permTableBody">
+            <tr><td colspan="5" style="text-align: center;">لا توجد طلبات أذونات معلقة</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- دليل الموظفين وإضافة موظف جديد -->
+    <div class="grid-sections">
+      
+      <div class="panel" id="secEmployees">
+        <div class="panel-header">👥 دليل الموظفين والتحكم في الحسابات</div>
+        <table>
+          <thead>
+            <tr><th>الكود</th><th>الاسم</th><th>الإدارة</th><th>الحالة</th><th>التحكم</th></tr>
+          </thead>
+          <tbody id="employeesTableBody">
+            <tr><td colspan="5" style="text-align: center;">جاري جلب القائمة...</td></tr>
+          </tbody>
         </table>
       </div>
 
       <div class="panel">
-        <div class="panel-header">🚪 طلبات الأذن والانصراف المبكر</div>
-        <table>
-          <thead><tr><th>الموظف</th><th>الوقت</th><th>السبب</th><th>القرار</th></tr></thead>
-          <tbody id="permTableBody"><tr><td colspan="4" style="text-align: center;">لا توجد طلبات أذونات معلقة</td></tr></tbody>
-        </table>
+        <div class="panel-header">➕ تسجيل وتوليد حساب موظف جديد</div>
+        <div class="input-group"><label>الاسم بالكامل:</label><input type="text" id="newName"></div>
+        <div class="input-group"><label>الرقم القومي:</label><input type="text" id="newNId"></div>
+        <div class="input-group"><label>الإدارة:</label><input type="text" id="newDept"></div>
+        <div class="input-group">
+          <label>الشفت:</label>
+          <select id="newShift"><option>صباحي</option><option>مسائي</option><option>شفت كامل</option></select>
+        </div>
+        <button class="btn-primary" onclick="submitNewEmp()">حفظ وتوليد بيانات الدخول</button>
+        <div id="newEmpCard" style="display: none;"></div>
       </div>
-    </div>
 
-    <!-- نموذج إضافة موظف جديد -->
-    <div class="panel" style="max-width: 500px; margin-bottom: 30px;">
-      <div class="panel-header">➕ تسجيل موظف جديد بالنظام</div>
-      <div class="input-group"><label>الاسم بالكامل:</label><input type="text" id="newName"></div>
-      <div class="input-group"><label>الرقم القومي:</label><input type="text" id="newNId"></div>
-      <div class="input-group"><label>الإدارة:</label><input type="text" id="newDept"></div>
-      <div class="input-group">
-        <label>الشفت:</label>
-        <select id="newShift"><option>صباحي</option><option>مسائي</option><option>شفت كامل</option></select>
-      </div>
-      <button class="btn-primary" onclick="submitNewEmp()">حفظ وتوليد الحساب</button>
-      <div id="newEmpCard" style="display: none;"></div>
     </div>
 
   </div>
@@ -153,18 +248,22 @@
       }
     }
 
+    // التنقل التلقائي وتظليل القسم عند الضغط على الكارت
+    function focusSection(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('panel-focus');
+        setTimeout(() => el.classList.remove('panel-focus'), 2000);
+      }
+    }
+
     async function fetchDashboardData() {
       try {
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          redirect: 'follow',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'getDashboardData' })
-        });
+        const url = `${SCRIPT_URL}?action=getAdminData`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
         const data = await res.json();
-        if (data.success) {
-          renderDashboard(data.result);
-        }
+        if (data && data.success) renderDashboard(data.result);
       } catch (e) {
         console.error(e);
       }
@@ -175,52 +274,121 @@
       document.getElementById('statPresent').textContent = data.presentCount;
       document.getElementById('statBreak').textContent = data.onBreakCount;
       document.getElementById('statLate').textContent = data.lateCount;
+      document.getElementById('presentSubCount').textContent = `(العدد: ${data.presentCount})`;
 
+      // 1. جدول الحاضرين المفصل
+      const presentBody = document.getElementById('presentTableBody');
+      if (data.presentList && data.presentList.length > 0) {
+        presentBody.innerHTML = data.presentList.map(p => `
+          <tr>
+            <td><b>${p.name}</b></td>
+            <td>${p.code}</td>
+            <td>${p.shift || 'صباحي'}</td>
+            <td>${p.time}</td>
+            <td><span style="color:${p.late > 0 ? '#dc2626' : '#166534'}; font-weight:600;">${p.status || 'حاضر'}</span></td>
+            <td>${p.loc && p.loc.includes('http') ? `<a href="${p.loc}" target="_blank" style="color:#2563eb; text-decoration:none; font-weight:600;">📍 الخريطة</a>` : 'غير متاح'}</td>
+          </tr>
+        `).join('');
+      } else {
+        presentBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">لم يسجل أحد الحضور اليوم بعد</td></tr>';
+      }
+
+      // 2. جدول البريك الجاري
       const breakBody = document.getElementById('breakTableBody');
       breakBody.innerHTML = data.onBreakList.length ? data.onBreakList.map(b => 
-        `<tr><td><b>${b.name}</b></td><td>${b.code}</td><td>${b.startTime}</td></tr>`
-      ).join('') : '<tr><td colspan="3" style="text-align:center;">لا يوجد أحد في بريك الآن</td></tr>';
+        `<tr>
+          <td><b>${b.name}</b></td><td>${b.code}</td><td>${b.startTime}</td>
+          <td><button class="btn-action btn-reject" onclick="forceEndBreak('${b.code}')">إنهاء البريك</button></td>
+        </tr>`
+      ).join('') : '<tr><td colspan="4" style="text-align:center;">لا يوجد أحد في بريك حالياً</td></tr>';
 
+      // 3. جدول المتأخرين
       const lateBody = document.getElementById('lateTableBody');
       lateBody.innerHTML = data.lateList.length ? data.lateList.map(l => 
-        `<tr><td><b>${l.name}</b></td><td>${l.code}</td><td style="color:red;">${l.time}</td></tr>`
-      ).join('') : '<tr><td colspan="3" style="text-align:center;">لا توجد حالات تأخير مسجلة</td></tr>';
+        `<tr>
+          <td><b>${l.name}</b></td><td>${l.code}</td><td>${l.time}</td>
+          <td style="color:red; font-weight:bold;">${l.late} دقيقة</td>
+          <td>${l.loc && l.loc.includes('http') ? `<a href="${l.loc}" target="_blank" style="color:#2563eb; font-weight:600;">📍 الخريطة</a>` : 'غير محدد'}</td>
+        </tr>`
+      ).join('') : '<tr><td colspan="5" style="text-align:center;">لا توجد حالات تأخير مسجلة اليوم</td></tr>';
 
+      // 4. طلبات الإجازات
       const leaveBody = document.getElementById('leaveTableBody');
       leaveBody.innerHTML = data.pendingLeaves.length ? data.pendingLeaves.map(lv => 
         `<tr>
-          <td><b>${lv.name}</b></td><td>${lv.type}</td><td>${lv.from} إلى ${lv.to}</td>
+          <td><b>${lv.name}</b></td><td>${lv.type}</td><td>${lv.from} إلى ${lv.to}</td><td>${lv.reason}</td>
           <td>
             <button class="btn-action btn-approve" onclick="makeDecision('leave', ${lv.rowIndex}, 'Approved')">قبول</button>
             <button class="btn-action btn-reject" onclick="makeDecision('leave', ${lv.rowIndex}, 'Rejected')">رفض</button>
           </td>
         </tr>`
-      ).join('') : '<tr><td colspan="4" style="text-align:center;">لا توجد طلبات إجازة معلقة</td></tr>';
+      ).join('') : '<tr><td colspan="5" style="text-align:center;">لا توجد طلبات إجازة معلقة</td></tr>';
 
+      // 5. طلبات الأذونات
       const permBody = document.getElementById('permTableBody');
       permBody.innerHTML = data.pendingPerms.length ? data.pendingPerms.map(p => 
         `<tr>
-          <td><b>${p.name}</b></td><td>من ${p.fromTime} إلى ${p.toTime}</td><td>${p.reason}</td>
+          <td><b>${p.name}</b></td><td>${p.date}</td><td>من ${p.fromTime} إلى ${p.toTime}</td><td>${p.reason}</td>
           <td>
             <button class="btn-action btn-approve" onclick="makeDecision('perm', ${p.rowIndex}, 'Approved')">قبول</button>
             <button class="btn-action btn-reject" onclick="makeDecision('perm', ${p.rowIndex}, 'Rejected')">رفض</button>
           </td>
         </tr>`
-      ).join('') : '<tr><td colspan="4" style="text-align:center;">لا توجد طلبات أذونات معلقة</td></tr>';
+      ).join('') : '<tr><td colspan="5" style="text-align:center;">لا توجد طلبات أذونات معلقة</td></tr>';
+
+      // 6. دليل الموظفين
+      const empBody = document.getElementById('employeesTableBody');
+      empBody.innerHTML = data.employeesList.length ? data.employeesList.map(emp => 
+        `<tr>
+          <td><b>${emp.code}</b></td><td>${emp.name}</td><td>${emp.dept}</td>
+          <td><span style="color:${emp.status === 'Active' ? 'green' : 'red'}; font-weight:bold;">${emp.status}</span></td>
+          <td>
+            <button class="btn-action ${emp.status === 'Active' ? 'btn-toggle-inactive' : 'btn-toggle-active'}" 
+                    onclick="toggleEmpStatus('${emp.code}', '${emp.status}')">
+              ${emp.status === 'Active' ? 'تعطيل' : 'تفعيل'}
+            </button>
+          </td>
+        </tr>`
+      ).join('') : '<tr><td colspan="5" style="text-align:center;">لا يوجد موظفون مسجلون</td></tr>';
     }
 
     async function makeDecision(type, rowIndex, status) {
-      if (!confirm(`هل أنت متأكد من ${status === 'Approved' ? 'قبول' : 'رفض'} هذا الطلب؟`)) return;
+      if (!confirm(`تأكيد ${status === 'Approved' ? 'قبول' : 'رفض'} هذا الطلب؟`)) return;
       try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          redirect: 'follow',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'decideRequest', sheetType: type, rowIndex: rowIndex, status: status })
-        });
+        const url = `${SCRIPT_URL}?action=decideRequest&type=${encodeURIComponent(type)}&rowIndex=${rowIndex}&status=${encodeURIComponent(status)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const d = await res.json();
+        alert(d.result.message);
         fetchDashboardData();
       } catch (e) {
         alert('حدث خطأ أثناء حفظ القرار.');
+      }
+    }
+
+    async function forceEndBreak(empCode) {
+      if (!confirm(`هل أنت متأكد من إنهاء بريك الموظف (${empCode})؟`)) return;
+      try {
+        const url = `${SCRIPT_URL}?action=endBreak&code=${encodeURIComponent(empCode)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const d = await res.json();
+        alert(d.result.message);
+        fetchDashboardData();
+      } catch (e) {
+        alert('حدث خطأ أثناء إنهاء البريك.');
+      }
+    }
+
+    async function toggleEmpStatus(empCode, currentStatus) {
+      const actionTxt = currentStatus === 'Active' ? 'تعطيل' : 'تفعيل';
+      if (!confirm(`هل أنت متأكد من ${actionTxt} حساب الموظف (${empCode})؟`)) return;
+      try {
+        const url = `${SCRIPT_URL}?action=toggleEmployee&code=${encodeURIComponent(empCode)}&status=${encodeURIComponent(currentStatus)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const d = await res.json();
+        alert(d.result.message);
+        fetchDashboardData();
+      } catch (e) {
+        alert('حدث خطأ أثناء تعديل حالة الموظف.');
       }
     }
 
@@ -231,25 +399,21 @@
       const shift = document.getElementById('newShift').value;
       const card = document.getElementById('newEmpCard');
 
-      if (!name || !nid || !dept) return alert('يرجى استكمال جميع البيانات.');
+      if (!name || !nid || !dept) return alert('يرجى ملء جميع الحقول المطلوبة.');
 
       try {
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          redirect: 'follow',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'createEmployee', fullName: name, nationalId: nid, department: dept, shiftType: shift })
-        });
+        const url = `${SCRIPT_URL}?action=createEmployee&fullName=${encodeURIComponent(name)}&nationalId=${encodeURIComponent(nid)}&department=${encodeURIComponent(dept)}&shiftType=${encodeURIComponent(shift)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
         const d = await res.json();
         if (d.success) {
-          card.innerHTML = `<div class="credential-card">✅ تم الإنشاء: <b>${d.result.name}</b><br>كود الموظف: <b>${d.result.code}</b> | كلمة المرور: <b>${d.result.password}</b></div>`;
+          card.innerHTML = `<div class="credential-card">✅ تم إضافة الموظف بنجاح:<br><b>الاسم:</b> ${d.result.name}<br><b>كود الدخول:</b> <span style="color:#2563eb; font-weight:bold;">${d.result.code}</span><br><b>كلمة المرور:</b> <span style="color:#d97706; font-weight:bold;">${d.result.password}</span></div>`;
           card.style.display = 'block';
           document.getElementById('newName').value = '';
           document.getElementById('newNId').value = '';
           document.getElementById('newDept').value = '';
           fetchDashboardData();
         }
-      } catch(e) {
+      } catch (e) {
         alert('حدث خطأ أثناء إضافة الموظف.');
       }
     }
