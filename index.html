@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKAN HR - بوابة الموظف</title>
+  <title>MAKAN HR - بوابة الموظف الذكية</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
@@ -15,12 +15,13 @@
     .clock-time { font-size: 22px; font-weight: 700; color: #202124; }
     .clock-date { font-size: 12px; color: #70757a; margin-top: 2px; }
 
+    /* عدادات العمل والبريك اللحظية */
     .employee-stats-card { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
     .stat-item { background: #f1f5f9; padding: 12px; border-radius: 10px; text-align: center; border-bottom: 3px solid #cbd5e1; }
     .stat-item.work { border-color: #10b981; }
     .stat-item.break { border-color: #f59e0b; }
     .stat-title { font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 4px; }
-    .stat-number { font-size: 18px; font-weight: bold; color: #1e293b; }
+    .stat-number { font-size: 17px; font-weight: bold; color: #1e293b; direction: ltr; }
 
     .emp-badge { background: #e8f0fe; color: #1967d2; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
     .top-actions { display: flex; gap: 10px; }
@@ -52,9 +53,11 @@
     .loading-info { background-color: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
     .loading { opacity: 0.6; pointer-events: none; }
 
+    /* الكاميرا المحدثة */
     #cameraModal { display: none; margin-top: 15px; background: #000; padding: 10px; border-radius: 12px; }
     #videoPreview { width: 100%; border-radius: 8px; transform: scaleX(-1); }
-    .cam-btn { background: #0d904f; color: #fff; padding: 10px; border: none; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 8px; cursor: pointer; }
+    #capturedCanvas { display: none; width: 100%; border-radius: 8px; }
+    .cam-btn { background: #0d904f; color: #fff; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 8px; cursor: pointer; font-size: 14px; }
 
     .modal-box { display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-top: 15px; text-align: right; }
     .modal-title { font-weight: bold; margin-bottom: 10px; text-align: center; color: #1e293b; }
@@ -71,7 +74,7 @@
 </head>
 <body>
 
-  <!-- 1. شاشة تسجيل الدخول -->
+  <!-- شاشة الدخول -->
   <div class="card" id="loginCard">
     <div class="logo">MAKAN HR</div>
     <div class="subtitle">تسجيل دخول الموظف</div>
@@ -87,7 +90,7 @@
     <div id="loginStatus" class="status-box"></div>
   </div>
 
-  <!-- 2. لوحة تحكم الموظف بعد الدخول -->
+  <!-- لوحة الموظف -->
   <div class="card" id="actionsCard" style="display: none;">
     <div class="logo">MAKAN HR</div>
     <div class="subtitle">بوابة الخدمة الذاتية لتسجيل الحضور والاستراحة</div>
@@ -105,25 +108,26 @@
       </div>
     </div>
 
-    <!-- العدادات الحية لساعات العمل والبريك -->
+    <!-- العدادات الحية التفاعلية -->
     <div class="employee-stats-card">
       <div class="stat-item work">
-        <div class="stat-title">⏱️ ساعات العمل اليوم</div>
-        <div class="stat-number" id="dispWorkHours">0.00 ساعة</div>
+        <div class="stat-title">⏱️ ساعات العمل الحالية</div>
+        <div class="stat-number" id="dispWorkHours">00:00:00</div>
       </div>
       <div class="stat-item break">
         <div class="stat-title">☕ إجمالي البريك اليوم</div>
-        <div class="stat-number" id="dispBreakMinutes">0 دقيقة</div>
+        <div class="stat-number" id="dispBreakMinutes">00:00:00</div>
       </div>
     </div>
 
-    <!-- كاميرا السيلفي للتحقق من الحضور -->
+    <!-- نافذة الكاميرا لتوثيق الصورة بالبيانات -->
     <div id="cameraModal">
       <video id="videoPreview" autoplay playsinline></video>
-      <button class="cam-btn" onclick="captureAndCheckIn()">📸 التقاط وتأكيد الحضور</button>
+      <canvas id="capturedCanvas"></canvas>
+      <button class="cam-btn" id="snapBtn" onclick="processAndConfirmCheckIn()">📸 التقاط وتأكيد الحضور</button>
     </div>
 
-    <!-- أزرار العمليات والطلبات -->
+    <!-- أزرار العمليات -->
     <div class="btn-grid" id="actionButtons">
       <button class="action-btn btn-checkin" onclick="startCheckInProcess()">✅ تسجيل حضور</button>
       <button class="action-btn btn-break-start" onclick="sendAction('startBreak')">☕ خروج استراحة</button>
@@ -134,17 +138,13 @@
       <button class="action-btn btn-history" onclick="openRequestsHistory()">📋 سجل ومتابعة طلباتي</button>
     </div>
 
-    <!-- نافذة متابعة الطلبات المقبولة والمرفوضة -->
+    <!-- نافذة سجل الطلبات -->
     <div class="modal-box" id="historyModal">
       <div class="modal-title">📋 سجل ومتابعة طلباتي</div>
       <div style="max-height: 220px; overflow-y: auto;">
         <table class="history-table">
           <thead>
-            <tr>
-              <th>النوع</th>
-              <th>التفاصيل</th>
-              <th>الحالة</th>
-            </tr>
+            <tr><th>النوع</th><th>التفاصيل</th><th>الحالة</th></tr>
           </thead>
           <tbody id="historyTableBody">
             <tr><td colspan="3" style="text-align: center;">جاري جلب الطلبات...</td></tr>
@@ -154,7 +154,7 @@
       <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('historyModal')">إغلاق</button>
     </div>
 
-    <!-- نافذة تغيير كلمة المرور -->
+    <!-- نافذة تغيير الباسورد -->
     <div class="modal-box" id="pwModal">
       <div class="modal-title">🔑 تغيير كلمة المرور</div>
       <div class="input-group"><label>كلمة المرور الحالية:</label><input type="password" id="oldPw"></div>
@@ -164,7 +164,7 @@
       <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('pwModal')">إلغاء</button>
     </div>
 
-    <!-- نافذة طلب إجازة -->
+    <!-- نموذج الإجازات -->
     <div class="modal-box" id="leaveModal">
       <div class="modal-title">🌴 نموذج طلب إجازة</div>
       <div class="input-group">
@@ -178,7 +178,7 @@
       <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('leaveModal')">إلغاء</button>
     </div>
 
-    <!-- نافذة طلب إذن / انصراف مبكر -->
+    <!-- نموذج الأذونات -->
     <div class="modal-box" id="permModal">
       <div class="modal-title">🚪 طلب إذن / انصراف مبكر</div>
       <div class="input-group"><label>التاريخ:</label><input type="date" id="permDate"></div>
@@ -196,6 +196,9 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyawrgkyHORWdXi9FnUnuKz3aCD4GmRifncv1WsHR7Mwe12s5OU7Cf9Tzr48vvN7aTA/exec";
     let mediaStream = null;
     let userLocation = "";
+    let locationPromise = null;
+    let liveStatsInterval = null;
+    let serverStats = null;
 
     function updateClock() {
       const now = new Date();
@@ -243,6 +246,9 @@
       document.getElementById('loginCard').style.display = 'none';
       document.getElementById('actionsCard').style.display = 'block';
       fetchEmployeeStats(code);
+
+      if (liveStatsInterval) clearInterval(liveStatsInterval);
+      liveStatsInterval = setInterval(updateLiveTimers, 1000);
     }
 
     async function fetchEmployeeStats(code) {
@@ -251,16 +257,52 @@
         const res = await fetch(url, { method: 'GET', redirect: 'follow' });
         const data = await res.json();
         if (data && data.success) {
-          document.getElementById('dispWorkHours').textContent = `${data.result.workHours} ساعة`;
-          document.getElementById('dispBreakMinutes').textContent = `${data.result.totalBreakMinutes} دقيقة`;
+          serverStats = data.result;
+          updateLiveTimers();
         }
       } catch (e) {
         console.warn('تعذر جلب الإحصائيات');
       }
     }
 
+    // عدادات الساعات والبريك بالثانية
+    function updateLiveTimers() {
+      if (!serverStats) return;
+
+      const now = new Date();
+      const todayStr = serverStats.dateStr;
+
+      // 1. حساب دقائق البريك
+      let breakSeconds = (serverStats.totalBreakMinutes || 0) * 60;
+      if (serverStats.onBreakNow && serverStats.currentBreakStart) {
+        const bStart = new Date(todayStr + ' ' + serverStats.currentBreakStart);
+        const ongoingBreakSec = Math.max(0, Math.floor((now - bStart) / 1000));
+        breakSeconds += ongoingBreakSec;
+      }
+      document.getElementById('dispBreakMinutes').textContent = formatHMS(breakSeconds);
+
+      // 2. حساب ساعات العمل الصافية
+      if (serverStats.checkInTime) {
+        const checkInDate = new Date(todayStr + ' ' + serverStats.checkInTime);
+        const endDate = serverStats.checkOutTime ? new Date(todayStr + ' ' + serverStats.checkOutTime) : now;
+        let totalElapsedSec = Math.max(0, Math.floor((endDate - checkInDate) / 1000));
+        let netWorkSec = Math.max(0, totalElapsedSec - breakSeconds);
+        document.getElementById('dispWorkHours').textContent = formatHMS(netWorkSec);
+      } else {
+        document.getElementById('dispWorkHours').textContent = "00:00:00";
+      }
+    }
+
+    function formatHMS(totalSeconds) {
+      const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSeconds % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
     function logoutEmployee() {
       stopCamera();
+      if (liveStatsInterval) clearInterval(liveStatsInterval);
       localStorage.removeItem('makan_user');
       location.reload();
     }
@@ -272,114 +314,94 @@
       modal.style.display = isVisible ? 'none' : 'block';
     }
 
-    async function openRequestsHistory() {
-      const user = JSON.parse(localStorage.getItem('makan_user'));
-      if (!user) return;
-
-      toggleModal('historyModal');
-      const tableBody = document.getElementById('historyTableBody');
-      tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">جاري تحميل سجل طلباتك...</td></tr>';
-
-      try {
-        const url = `${SCRIPT_URL}?action=getMyRequests&code=${encodeURIComponent(user.code)}`;
-        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-        const data = await res.json();
-
-        if (data && data.success && data.result.requests.length > 0) {
-          tableBody.innerHTML = data.result.requests.map(req => {
-            let badgeClass = 'badge-pending';
-            let statusText = 'قيد المراجعة';
-            if (req.status === 'Approved' || req.status === 'مقبول') {
-              badgeClass = 'badge-approved';
-              statusText = 'مقبول ✅';
-            } else if (req.status === 'Rejected' || req.status === 'مرفوض') {
-              badgeClass = 'badge-rejected';
-              statusText = 'مرفوض ❌';
-            }
-            return `
-              <tr>
-                <td><b>${req.type}</b></td>
-                <td><span style="color:#475569;">${req.details}</span><br><small style="color:#64748b;">${req.reason || ''}</small></td>
-                <td><span class="badge-status ${badgeClass}">${statusText}</span></td>
-              </tr>
-            `;
-          }).join('');
-        } else {
-          tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات مسجلة لك حتى الآن.</td></tr>';
-        }
-      } catch (e) {
-        tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">فشل جلب الطلبات، تأكد من الاتصال.</td></tr>';
-      }
-    }
-
-    async function submitPasswordChange() {
-      const user = JSON.parse(localStorage.getItem('makan_user'));
-      const oldPw = document.getElementById('oldPw').value.trim();
-      const newPw = document.getElementById('newPw').value.trim();
-      const confirmPw = document.getElementById('confirmPw').value.trim();
-      const statusBox = document.getElementById('actionStatus');
-
-      if (!oldPw || !newPw || !confirmPw) return alert('يرجى ملء جميع حقول تغيير كلمة المرور.');
-      if (newPw !== confirmPw) return alert('كلمة المرور الجديدة وتأكيدها غير متطابقين.');
-      if (newPw.length < 4) return alert('يجب ألا تقل كلمة المرور الجديدة عن 4 خانات.');
-
-      toggleModal('pwModal');
-      showMsg(statusBox, 'جاري تحديث كلمة المرور...', 'loading-info');
-
-      try {
-        const url = `${SCRIPT_URL}?action=changePassword&code=${encodeURIComponent(user.code)}&oldPassword=${encodeURIComponent(oldPw)}&newPassword=${encodeURIComponent(newPw)}`;
-        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-        const data = await res.json();
-
-        if (data && data.success) {
-          showMsg(statusBox, '✅ ' + data.result.message, 'success');
-          document.getElementById('oldPw').value = '';
-          document.getElementById('newPw').value = '';
-          document.getElementById('confirmPw').value = '';
-        } else {
-          showMsg(statusBox, (data && data.error) ? data.error : 'فشل تغيير كلمة المرور.', 'error');
-        }
-      } catch (e) {
-        showMsg(statusBox, 'حدث خطأ في الاتصال، يرجى المحاولة مرة ثانية.', 'error');
-      }
+    // جلب موقع الـ GPS مع انتظار التأكيد
+    function getPreciseLocation() {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) return resolve("");
+        navigator.geolocation.getCurrentPosition(
+          pos => resolve(`${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`),
+          err => { console.warn(err); resolve(""); },
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
+      });
     }
 
     async function startCheckInProcess() {
       const statusBox = document.getElementById('actionStatus');
-      showMsg(statusBox, 'جاري تشغيل الكاميرا وتحديد الموقع...', 'loading-info');
+      showMsg(statusBox, 'جاري تشغيل الكاميرا وجلب الموقع الجغرافي الدقيق...', 'loading-info');
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          pos => { userLocation = `${pos.coords.latitude},${pos.coords.longitude}`; },
-          err => { userLocation = ""; },
-          { enableHighAccuracy: true, timeout: 7000 }
-        );
-      }
+      locationPromise = getPreciseLocation();
 
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-        document.getElementById('videoPreview').srcObject = mediaStream;
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: false
+        });
+        const video = document.getElementById('videoPreview');
+        video.srcObject = mediaStream;
+        video.style.display = 'block';
+        document.getElementById('capturedCanvas').style.display = 'none';
         document.getElementById('cameraModal').style.display = 'block';
         document.getElementById('actionButtons').style.display = 'none';
-        showMsg(statusBox, 'اضغط على الزر الأخضر لتأكيد صورتك وحضورك.', 'loading-info');
+        showMsg(statusBox, 'اضغط "التقاط وتأكيد الحضور" لختم بياناتك على الصورة.', 'loading-info');
       } catch (e) {
         stopCamera();
+        userLocation = await locationPromise;
         sendAction('checkIn', userLocation);
       }
     }
 
-    function stopCamera() {
+    // التقاط الصورة ورسم ختم التاريخ والوقت واللوكيشن
+    async function processAndConfirmCheckIn() {
+      const video = document.getElementById('videoPreview');
+      const canvas = document.getElementById('capturedCanvas');
+      const ctx = canvas.getContext('2d');
+      const user = JSON.parse(localStorage.getItem('makan_user'));
+
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+
+      // 1. رسم الصورة المعكوسة
+      ctx.save();
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+      ctx.restore();
+
+      // 2. انتظار إحداثيات اللوكيشن
+      userLocation = await locationPromise;
+
+      // 3. طباعة شريط التوقيت واللوكيشن داخل الصورة
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('ar-EG');
+      const dateStr = now.toLocaleDateString('ar-EG');
+      const locText = userLocation ? `📍 الموقع: ${userLocation}` : "📍 الموقع: لم يحدد";
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+      ctx.fillRect(0, canvas.height - 75, canvas.width, 75);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto";
+      ctx.direction = "rtl";
+      ctx.fillText(`👤 ${user.name} (${user.code})`, canvas.width - 20, canvas.height - 48);
+      ctx.fillText(`🕒 ${dateStr} - ${timeStr}`, canvas.width - 20, canvas.height - 26);
+      ctx.fillText(locText, canvas.width - 20, canvas.height - 8);
+
+      video.style.display = 'none';
+      canvas.style.display = 'block';
+
+      stopCamera(false);
+      sendAction('checkIn', userLocation);
+    }
+
+    function stopCamera(resetUI = true) {
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
         mediaStream = null;
       }
-      document.getElementById('cameraModal').style.display = 'none';
-      document.getElementById('actionButtons').style.display = 'grid';
-    }
-
-    function captureAndCheckIn() {
-      stopCamera();
-      sendAction('checkIn', userLocation);
+      if (resetUI) {
+        document.getElementById('cameraModal').style.display = 'none';
+        document.getElementById('actionButtons').style.display = 'grid';
+      }
     }
 
     async function sendAction(actionType, locationCoords = "") {
@@ -390,7 +412,7 @@
       const statusBox = document.getElementById('actionStatus');
 
       card.classList.add('loading');
-      showMsg(statusBox, 'جاري معالجة الحركة وتسجيلها...', 'loading-info');
+      showMsg(statusBox, 'جاري معالجة وتوثيق الحركة...', 'loading-info');
 
       try {
         let url = `${SCRIPT_URL}?action=${encodeURIComponent(actionType)}&code=${encodeURIComponent(user.code)}`;
@@ -406,9 +428,79 @@
           showMsg(statusBox, (data && data.error) ? data.error : 'حدث خطأ أثناء التنفيذ.', 'error');
         }
       } catch (err) {
-        showMsg(statusBox, 'حدث خطأ في الاتصال، يرجى المحاولة مرة ثانية.', 'error');
+        showMsg(statusBox, 'حدث خطأ في الاتصال، يرجى المحاولة ثانية.', 'error');
       } finally {
         card.classList.remove('loading');
+        document.getElementById('cameraModal').style.display = 'none';
+        document.getElementById('actionButtons').style.display = 'grid';
+      }
+    }
+
+    async function openRequestsHistory() {
+      const user = JSON.parse(localStorage.getItem('makan_user'));
+      if (!user) return;
+
+      toggleModal('historyModal');
+      const tableBody = document.getElementById('historyTableBody');
+      tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">جاري جلب سجل طلباتك...</td></tr>';
+
+      try {
+        const url = `${SCRIPT_URL}?action=getMyRequests&code=${encodeURIComponent(user.code)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const data = await res.json();
+
+        if (data && data.success && data.result.requests.length > 0) {
+          tableBody.innerHTML = data.result.requests.map(req => {
+            let badgeClass = 'badge-pending', statusText = 'قيد المراجعة';
+            if (req.status === 'Approved' || req.status === 'مقبول') {
+              badgeClass = 'badge-approved'; statusText = 'مقبول ✅';
+            } else if (req.status === 'Rejected' || req.status === 'مرفوض') {
+              badgeClass = 'badge-rejected'; statusText = 'مرفوض ❌';
+            }
+            return `
+              <tr>
+                <td><b>${req.type}</b></td>
+                <td><span style="color:#475569;">${req.details}</span><br><small style="color:#64748b;">${req.reason || ''}</small></td>
+                <td><span class="badge-status ${badgeClass}">${statusText}</span></td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات مسجلة لك حتى الآن.</td></tr>';
+        }
+      } catch (e) {
+        tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">فشل جلب الطلبات.</td></tr>';
+      }
+    }
+
+    async function submitPasswordChange() {
+      const user = JSON.parse(localStorage.getItem('makan_user'));
+      const oldPw = document.getElementById('oldPw').value.trim();
+      const newPw = document.getElementById('newPw').value.trim();
+      const confirmPw = document.getElementById('confirmPw').value.trim();
+      const statusBox = document.getElementById('actionStatus');
+
+      if (!oldPw || !newPw || !confirmPw) return alert('يرجى ملء جميع حقول تغيير كلمة المرور.');
+      if (newPw !== confirmPw) return alert('كلمة المرور الجديدة وتأكيدها غير متطابقين.');
+      if (newPw.length < 4) return alert('يجب ألا تقل كلمة المرور عن 4 خانات.');
+
+      toggleModal('pwModal');
+      showMsg(statusBox, 'جاري تحديث كلمة المرور...', 'loading-info');
+
+      try {
+        const url = `${SCRIPT_URL}?action=changePassword&code=${encodeURIComponent(user.code)}&oldPassword=${encodeURIComponent(oldPw)}&newPassword=${encodeURIComponent(newPw)}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const data = await res.json();
+        if (data && data.success) {
+          showMsg(statusBox, '✅ ' + data.result.message, 'success');
+          document.getElementById('oldPw').value = '';
+          document.getElementById('newPw').value = '';
+          document.getElementById('confirmPw').value = '';
+        } else {
+          showMsg(statusBox, (data && data.error) ? data.error : 'فشل تغيير كلمة المرور.', 'error');
+        }
+      } catch (e) {
+        showMsg(statusBox, 'حدث خطأ في الاتصال.', 'error');
       }
     }
 
@@ -420,7 +512,7 @@
       const reason = document.getElementById('leaveReason').value.trim();
       const statusBox = document.getElementById('actionStatus');
 
-      if (!from || !to || !reason) return alert('يرجى ملء كافة تفاصيل الإجازة والسبب.');
+      if (!from || !to || !reason) return alert('يرجى ملء كافة تفاصيل الإجازة.');
       toggleModal('leaveModal');
       showMsg(statusBox, 'جاري إرسال طلب الإجازة...', 'loading-info');
 
@@ -430,7 +522,7 @@
         const data = await res.json();
         showMsg(statusBox, data.result.message || 'تم إرسال الطلب بنجاح.', 'success');
       } catch (e) {
-        showMsg(statusBox, 'تعذر إرسال الطلب، تأكد من الاتصال.', 'error');
+        showMsg(statusBox, 'تعذر إرسال الطلب.', 'error');
       }
     }
 
@@ -442,7 +534,7 @@
       const reason = document.getElementById('permReason').value.trim();
       const statusBox = document.getElementById('actionStatus');
 
-      if (!date || !from || !to || !reason) return alert('يرجى ملء كافة تفاصيل موعد الإذن والسبب.');
+      if (!date || !from || !to || !reason) return alert('يرجى ملء كافة تفاصيل الإذن.');
       toggleModal('permModal');
       showMsg(statusBox, 'جاري إرسال طلب الإذن...', 'loading-info');
 
@@ -452,7 +544,7 @@
         const data = await res.json();
         showMsg(statusBox, data.result.message || 'تم إرسال الطلب بنجاح.', 'success');
       } catch (e) {
-        showMsg(statusBox, 'تعذر إرسال الطلب، تأكد من الاتصال.', 'error');
+        showMsg(statusBox, 'تعذر إرسال الطلب.', 'error');
       }
     }
 
