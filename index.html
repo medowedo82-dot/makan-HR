@@ -53,7 +53,6 @@
     .loading-info { background-color: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
     .loading { opacity: 0.6; pointer-events: none; }
 
-    /* الكاميرا المحدثة */
     #cameraModal { display: none; margin-top: 15px; background: #000; padding: 10px; border-radius: 12px; }
     #videoPreview { width: 100%; border-radius: 8px; transform: scaleX(-1); }
     #capturedCanvas { display: none; width: 100%; border-radius: 8px; }
@@ -108,7 +107,7 @@
       </div>
     </div>
 
-    <!-- العدادات الحية التفاعلية -->
+    <!-- العدادات الحية بعد معالجة NaN -->
     <div class="employee-stats-card">
       <div class="stat-item work">
         <div class="stat-title">⏱️ ساعات العمل الحالية</div>
@@ -120,7 +119,7 @@
       </div>
     </div>
 
-    <!-- نافذة الكاميرا لتوثيق الصورة بالبيانات -->
+    <!-- كاميرا السيلفي -->
     <div id="cameraModal">
       <video id="videoPreview" autoplay playsinline></video>
       <canvas id="capturedCanvas"></canvas>
@@ -138,7 +137,7 @@
       <button class="action-btn btn-history" onclick="openRequestsHistory()">📋 سجل ومتابعة طلباتي</button>
     </div>
 
-    <!-- نافذة سجل الطلبات -->
+    <!-- سجل الطلبات -->
     <div class="modal-box" id="historyModal">
       <div class="modal-title">📋 سجل ومتابعة طلباتي</div>
       <div style="max-height: 220px; overflow-y: auto;">
@@ -154,7 +153,7 @@
       <button class="action-btn btn-cancel" style="width: 100%;" onclick="toggleModal('historyModal')">إغلاق</button>
     </div>
 
-    <!-- نافذة تغيير الباسورد -->
+    <!-- تغيير الباسورد -->
     <div class="modal-box" id="pwModal">
       <div class="modal-title">🔑 تغيير كلمة المرور</div>
       <div class="input-group"><label>كلمة المرور الحالية:</label><input type="password" id="oldPw"></div>
@@ -265,28 +264,46 @@
       }
     }
 
-    // عدادات الساعات والبريك بالثانية
+    // استخراج عدد الثواني منذ منتصف الليل بدقة لتفادي NaN
+    function parseTimeToSeconds(timeVal) {
+      if (!timeVal) return null;
+      const str = String(timeVal).trim();
+      // البحث عن أول تطابق لساعات:دقائق:ثواني
+      const match = str.match(/(\d{1,2}):(\d{2}):?(\d{2})?/);
+      if (match) {
+        const h = parseInt(match[1], 10);
+        const m = parseInt(match[2], 10);
+        const s = match[3] ? parseInt(match[3], 10) : 0;
+        return (h * 3600) + (m * 60) + s;
+      }
+      return null;
+    }
+
+    // حساب العدادات الحية بدون أخطاء NaN
     function updateLiveTimers() {
       if (!serverStats) return;
 
       const now = new Date();
-      const todayStr = serverStats.dateStr;
+      const currentSecondsNow = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
 
-      // 1. حساب دقائق البريك
-      let breakSeconds = (serverStats.totalBreakMinutes || 0) * 60;
+      // 1. حساب البريك
+      let breakSec = (Number(serverStats.totalBreakMinutes) || 0) * 60;
       if (serverStats.onBreakNow && serverStats.currentBreakStart) {
-        const bStart = new Date(todayStr + ' ' + serverStats.currentBreakStart);
-        const ongoingBreakSec = Math.max(0, Math.floor((now - bStart) / 1000));
-        breakSeconds += ongoingBreakSec;
+        const bStartSec = parseTimeToSeconds(serverStats.currentBreakStart);
+        if (bStartSec !== null) {
+          const ongoingSec = Math.max(0, currentSecondsNow - bStartSec);
+          breakSec += ongoingSec;
+        }
       }
-      document.getElementById('dispBreakMinutes').textContent = formatHMS(breakSeconds);
+      document.getElementById('dispBreakMinutes').textContent = formatHMS(breakSec);
 
-      // 2. حساب ساعات العمل الصافية
-      if (serverStats.checkInTime) {
-        const checkInDate = new Date(todayStr + ' ' + serverStats.checkInTime);
-        const endDate = serverStats.checkOutTime ? new Date(todayStr + ' ' + serverStats.checkOutTime) : now;
-        let totalElapsedSec = Math.max(0, Math.floor((endDate - checkInDate) / 1000));
-        let netWorkSec = Math.max(0, totalElapsedSec - breakSeconds);
+      // 2. حساب صافي العمل
+      const checkInSec = parseTimeToSeconds(serverStats.checkInTime);
+      if (checkInSec !== null) {
+        const checkOutSec = parseTimeToSeconds(serverStats.checkOutTime);
+        const endSec = (checkOutSec !== null) ? checkOutSec : currentSecondsNow;
+        const totalElapsedSec = Math.max(0, endSec - checkInSec);
+        const netWorkSec = Math.max(0, totalElapsedSec - breakSec);
         document.getElementById('dispWorkHours').textContent = formatHMS(netWorkSec);
       } else {
         document.getElementById('dispWorkHours').textContent = "00:00:00";
@@ -294,6 +311,7 @@
     }
 
     function formatHMS(totalSeconds) {
+      if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
       const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
       const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
       const s = String(totalSeconds % 60).padStart(2, '0');
@@ -314,7 +332,6 @@
       modal.style.display = isVisible ? 'none' : 'block';
     }
 
-    // جلب موقع الـ GPS مع انتظار التأكيد
     function getPreciseLocation() {
       return new Promise((resolve) => {
         if (!navigator.geolocation) return resolve("");
@@ -328,7 +345,7 @@
 
     async function startCheckInProcess() {
       const statusBox = document.getElementById('actionStatus');
-      showMsg(statusBox, 'جاري تشغيل الكاميرا وجلب الموقع الجغرافي الدقيق...', 'loading-info');
+      showMsg(statusBox, 'جاري تشغيل الكاميرا وتحديد الموقع...', 'loading-info');
 
       locationPromise = getPreciseLocation();
 
@@ -343,7 +360,7 @@
         document.getElementById('capturedCanvas').style.display = 'none';
         document.getElementById('cameraModal').style.display = 'block';
         document.getElementById('actionButtons').style.display = 'none';
-        showMsg(statusBox, 'اضغط "التقاط وتأكيد الحضور" لختم بياناتك على الصورة.', 'loading-info');
+        showMsg(statusBox, 'اضغط "التقاط وتأكيد الحضور" لتوثيق الصورة والبيانات.', 'loading-info');
       } catch (e) {
         stopCamera();
         userLocation = await locationPromise;
@@ -351,7 +368,6 @@
       }
     }
 
-    // التقاط الصورة ورسم ختم التاريخ والوقت واللوكيشن
     async function processAndConfirmCheckIn() {
       const video = document.getElementById('videoPreview');
       const canvas = document.getElementById('capturedCanvas');
@@ -361,20 +377,17 @@
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
 
-      // 1. رسم الصورة المعكوسة
       ctx.save();
       ctx.scale(-1, 1);
       ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
       ctx.restore();
 
-      // 2. انتظار إحداثيات اللوكيشن
       userLocation = await locationPromise;
 
-      // 3. طباعة شريط التوقيت واللوكيشن داخل الصورة
       const now = new Date();
       const timeStr = now.toLocaleTimeString('ar-EG');
       const dateStr = now.toLocaleDateString('ar-EG');
-      const locText = userLocation ? `📍 الموقع: ${userLocation}` : "📍 الموقع: لم يحدد";
+      const locText = userLocation ? `📍 الموقع: ${userLocation}` : "📍 الموقع: لم يُحدد";
 
       ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
       ctx.fillRect(0, canvas.height - 75, canvas.width, 75);
